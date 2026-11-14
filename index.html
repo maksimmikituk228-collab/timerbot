@@ -6,12 +6,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Таймер 2 год">
-  <title>Таймер 2 год + 30 хв</title>
+  <title>Таймер 2 год + Пауза</title>
   <style>
     :root {
       --bg-color: #090b10;
-      --card-bg: rgba(255, 255, 255, 0.04);
-      --border-color: rgba(255, 255, 255, 0.09);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --border-color: rgba(255, 255, 255, 0.1);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --accent: #38bdf8;
@@ -47,7 +47,6 @@
       padding-right: 20px;
     }
 
-    /* Динамічне світіння фону */
     .ambient-glow {
       position: fixed;
       top: 42%;
@@ -93,12 +92,8 @@
       background: #64748b;
     }
     .dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .dot.paused { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
     .dot.done { background: var(--success); box-shadow: 0 0 8px var(--success); }
-
-    .icon-btns {
-      display: flex;
-      gap: 10px;
-    }
 
     .icon-btn {
       width: 38px;
@@ -145,14 +140,7 @@
       stroke: var(--accent);
       stroke-width: 10;
       stroke-linecap: round;
-      transition: stroke-dashoffset 0.35s linear, stroke 0.5s ease;
-    }
-
-    /* Мітки 30, 60, 90 хв на кільці */
-    .checkpoint-markers {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+      transition: stroke-dashoffset 0.35s linear, stroke 0.4s ease;
     }
 
     .timer-content {
@@ -166,6 +154,11 @@
       letter-spacing: -1px;
       font-variant-numeric: tabular-nums;
       line-height: 1.1;
+      transition: opacity 0.3s ease;
+    }
+
+    #time-display.paused-blink {
+      opacity: 0.7;
     }
 
     #end-time-label {
@@ -179,7 +172,7 @@
       font-size: 0.78rem;
       font-weight: 600;
       color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
+      background: rgba(56, 189, 248, 0.12);
       padding: 4px 10px;
       border-radius: 12px;
       display: inline-block;
@@ -202,33 +195,60 @@
       border: none;
       background: linear-gradient(135deg, #0284c7, #2563eb);
       color: #fff;
-      font-size: 1.1rem;
+      font-size: 1.08rem;
       font-weight: 600;
       box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5);
       cursor: pointer;
-      transition: transform 0.12s ease, opacity 0.2s;
+      transition: transform 0.12s ease;
     }
     .primary-btn:active { transform: scale(0.97); }
 
-    .secondary-btn {
+    .secondary-row {
+      display: flex;
+      gap: 10px;
       width: 100%;
-      height: 46px;
+    }
+
+    .secondary-btn {
+      flex: 1;
+      height: 48px;
       border-radius: 15px;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      font-weight: 500;
+      color: var(--text-main);
+      font-size: 0.94rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
+
     .secondary-btn:not(:disabled):active {
       transform: scale(0.97);
-      color: var(--danger);
-      border-color: rgba(239, 68, 68, 0.4);
     }
+
+    .secondary-btn.pause-active {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fbbf24;
+    }
+
+    .secondary-btn.resume-active {
+      background: rgba(16, 185, 129, 0.16);
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #34d399;
+    }
+
+    .secondary-btn.reset-btn:not(:disabled):active {
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.45);
+    }
+
     .secondary-btn:disabled {
-      opacity: 0.35;
+      opacity: 0.32;
       cursor: default;
     }
 
@@ -353,9 +373,7 @@
       <span class="dot" id="status-dot"></span>
       <span id="status-badge-text">Очікування</span>
     </div>
-    <div class="icon-btns">
-      <button class="icon-btn" id="open-settings-btn" title="Налаштування">⚙️</button>
-    </div>
+    <button class="icon-btn" id="open-settings-btn" title="Налаштування">⚙️</button>
   </div>
 
   <!-- Центральний круговий прогрес -->
@@ -363,7 +381,7 @@
     <svg class="progress-ring" width="266" height="266">
       <circle class="ring-bg" cx="133" cy="133" r="120"></circle>
       <circle class="ring-progress" id="ring-progress" cx="133" cy="133" r="120"></circle>
-      <!-- Візуальні поділки кожні 30 хв (12, 3, 6, 9 годин) -->
+      <!-- Поділки кожні 30 хв -->
       <line x1="253" y1="133" x2="262" y2="133" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
       <line x1="133" y1="253" x2="133" y2="262" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
       <line x1="13" y1="133" x2="4" y2="133" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
@@ -373,14 +391,17 @@
     <div class="timer-content">
       <div id="time-display">02:00:00</div>
       <div id="end-time-label">Натисніть старт</div>
-      <div id="next-checkpoint-label" style="display: none;">Нагадування через 30 хв</div>
+      <div id="next-checkpoint-label" style="display: none;">Сигнал через 30 хв</div>
     </div>
   </div>
 
   <!-- Кнопки керування -->
   <div class="controls">
     <button class="primary-btn" id="main-btn">Старт (2 год)</button>
-    <button class="secondary-btn" id="stop-btn" disabled>Стоп / Скинути</button>
+    <div class="secondary-row">
+      <button class="secondary-btn" id="pause-btn" disabled>⏸ Пауза</button>
+      <button class="secondary-btn reset-btn" id="reset-btn" disabled>↺ Скинути</button>
+    </div>
   </div>
 
   <!-- Плаваюче сповіщення -->
@@ -426,8 +447,8 @@
   </div>
 
   <script>
-    const TOTAL_MS = 2 * 60 * 60 * 1000; // 2 години (7200000 мс)
-    const INTERVAL_MS = 30 * 60 * 1000;   // 30 хвилин (1800000 мс)
+    const TOTAL_MS = 2 * 60 * 60 * 1000; // 2 години
+    const INTERVAL_MS = 30 * 60 * 1000;   // 30 хвилин
 
     const ring = document.getElementById('ring-progress');
     const radius = 120;
@@ -441,22 +462,22 @@
     const statusDot = document.getElementById('status-dot');
     const statusBadgeText = document.getElementById('status-badge-text');
     const ambientGlow = document.getElementById('ambient-glow');
+
     const mainBtn = document.getElementById('main-btn');
-    const stopBtn = document.getElementById('stop-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
 
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toast-msg');
     const toastActionBtn = document.getElementById('toast-action-btn');
 
-    // Налаштування
     const chk30Min = document.getElementById('chk-30min');
     const chkIosShortcut = document.getElementById('chk-ios-shortcut');
     const firebaseInput = document.getElementById('firebase-url-input');
 
-    let previousEndTime = null;
+    let backupState = null; // для кнопки "Скасувати"
     let toastTimeout = null;
 
-    // Завантаження збережених налаштувань
     chk30Min.checked = localStorage.getItem('remind30m') !== 'false';
     chkIosShortcut.checked = localStorage.getItem('useIosShortcut') === 'true';
     firebaseInput.value = localStorage.getItem('firebaseUrl') || '';
@@ -472,18 +493,15 @@
       localStorage.setItem('firebaseUrl', firebaseInput.value.trim().replace(/\/$/, ''));
     });
 
-    // Модалка налаштувань
     const settingsModal = document.getElementById('settings-modal');
     document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('open');
     document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('open');
     settingsModal.onclick = (e) => { if (e.target === settingsModal) settingsModal.classList.remove('open'); };
 
-    // Звуковий синтезатор (Web Audio API)
     function playChime(type = 'interval') {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const now = ctx.currentTime;
-        // Для 30-хв нагадування — подвійний м'який сигнал; для фінішу — потрійний акорд
         const notes = type === 'finish' ? [523.25, 659.25, 783.99, 1046.5] : [587.33, 880];
         notes.forEach((freq, idx) => {
           const osc = ctx.createOscillator();
@@ -508,9 +526,7 @@
 
     function sendNotification(title, body) {
       if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-          new Notification(title, { body });
-        } catch (e) {}
+        try { new Notification(title, { body }); } catch (e) {}
       }
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     }
@@ -526,24 +542,30 @@
     }
 
     toastActionBtn.onclick = () => {
-      if (previousEndTime) {
-        localStorage.setItem('timerEndTime', previousEndTime);
-        syncCloud(previousEndTime);
-        previousEndTime = null;
+      if (backupState) {
+        if (backupState.endTime) {
+          localStorage.setItem('timerEndTime', backupState.endTime);
+          localStorage.removeItem('pausedRemaining');
+          syncCloud(backupState.endTime, 0);
+        } else if (backupState.pausedRemaining) {
+          localStorage.setItem('pausedRemaining', backupState.pausedRemaining);
+          localStorage.removeItem('timerEndTime');
+          syncCloud(0, backupState.pausedRemaining);
+        }
+        backupState = null;
         toast.classList.remove('show');
         updateUI();
       }
     };
 
-    // Синхронізація з Firebase (якщо вказано URL)
-    async function syncCloud(endTimeVal) {
+    async function syncCloud(endTimeVal, pausedVal = 0) {
       const baseUrl = localStorage.getItem('firebaseUrl');
       if (!baseUrl) return;
       try {
         await fetch(`${baseUrl}/timer.json`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endTime: endTimeVal, updatedAt: Date.now() })
+          body: JSON.stringify({ endTime: endTimeVal, pausedRemaining: pausedVal, updatedAt: Date.now() })
         });
       } catch (e) {}
     }
@@ -554,16 +576,23 @@
       try {
         const res = await fetch(`${baseUrl}/timer.json`);
         const data = await res.json();
-        if (data && typeof data.endTime !== 'undefined') {
-          const localEnd = Number(localStorage.getItem('timerEndTime')) || 0;
-          if (Math.abs(data.endTime - localEnd) > 2000) {
-            if (data.endTime === 0) {
-              localStorage.removeItem('timerEndTime');
-            } else {
-              localStorage.setItem('timerEndTime', data.endTime);
-            }
-            updateUI();
-          }
+        if (!data) return;
+
+        const localEnd = Number(localStorage.getItem('timerEndTime')) || 0;
+        const localPaused = Number(localStorage.getItem('pausedRemaining')) || 0;
+
+        if (data.pausedRemaining > 0 && Math.abs(data.pausedRemaining - localPaused) > 1500) {
+          localStorage.removeItem('timerEndTime');
+          localStorage.setItem('pausedRemaining', data.pausedRemaining);
+          updateUI();
+        } else if (data.endTime > 0 && Math.abs(data.endTime - localEnd) > 2000) {
+          localStorage.removeItem('pausedRemaining');
+          localStorage.setItem('timerEndTime', data.endTime);
+          updateUI();
+        } else if (data.endTime === 0 && !data.pausedRemaining && (localEnd > 0 || localPaused > 0)) {
+          localStorage.removeItem('timerEndTime');
+          localStorage.removeItem('pausedRemaining');
+          updateUI();
         }
       } catch (e) {}
     }
@@ -581,30 +610,34 @@
       return `${h}:${m}:${s}`;
     }
 
-    function startOrResetTimer() {
+    // 1. Старт або повне оновлення на 2 години
+    function startOrRestart2H() {
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
       }
 
       const currentEnd = Number(localStorage.getItem('timerEndTime'));
+      const currentPaused = Number(localStorage.getItem('pausedRemaining'));
       const now = Date.now();
 
-      // Зберігаємо попередній стан для Undo, якщо таймер уже йшов > 10 сек
       if (currentEnd && currentEnd > now && (TOTAL_MS - (currentEnd - now)) > 10000) {
-        previousEndTime = currentEnd;
-        showToast('Таймер оновлено на 2 години', true);
+        backupState = { endTime: currentEnd, pausedRemaining: 0 };
+        showToast('Оновлено на 2 години', true);
+      } else if (currentPaused > 0) {
+        backupState = { endTime: 0, pausedRemaining: currentPaused };
+        showToast('Запущено новий відлік (2 год)', true);
       } else {
-        previousEndTime = null;
+        backupState = null;
         showToast('Відлік на 2 години розпочато', false);
       }
 
       const newEnd = now + TOTAL_MS;
+      localStorage.removeItem('pausedRemaining');
       localStorage.setItem('timerEndTime', newEnd);
-      localStorage.setItem('lastPassedStep', '0'); // 0 = старт, 1 = 30хв, 2 = 60хв, 3 = 90хв, 4 = фініш
-      syncCloud(newEnd);
+      localStorage.setItem('lastPassedStep', '0');
+      syncCloud(newEnd, 0);
       updateUI();
 
-      // Якщо увімкнено інтеграцію з системною командою iOS
       if (chkIosShortcut.checked) {
         setTimeout(() => {
           window.location.href = 'shortcuts://run-shortcut?name=Timer30m';
@@ -612,22 +645,81 @@
       }
     }
 
-    function stopTimer() {
-      const currentEnd = Number(localStorage.getItem('timerEndTime'));
-      if (currentEnd && currentEnd > Date.now()) {
-        previousEndTime = currentEnd;
-        showToast('Таймер зупинено', true);
+    // 2. Пауза або Продовжити з того ж місця
+    function togglePauseResume() {
+      const now = Date.now();
+      const endTime = Number(localStorage.getItem('timerEndTime'));
+      const pausedRemaining = Number(localStorage.getItem('pausedRemaining'));
+
+      if (endTime && endTime > now) {
+        // Ставимо на ПАУЗУ: фіксуємо точний залишок мілісекунд
+        const remaining = endTime - now;
+        localStorage.removeItem('timerEndTime');
+        localStorage.setItem('pausedRemaining', remaining);
+        syncCloud(0, remaining);
+        showToast('⏸ Таймер на паузі', false);
+      } else if (pausedRemaining > 0) {
+        // ПРОДОВЖУЄМО з того ж місця: додаємо збережений залишок до поточного часу
+        const resumedEnd = now + pausedRemaining;
+        localStorage.removeItem('pausedRemaining');
+        localStorage.setItem('timerEndTime', resumedEnd);
+        syncCloud(resumedEnd, 0);
+        showToast('▶️ Відлік продовжено', false);
       }
+      updateUI();
+    }
+
+    // 3. Повне скидання в початковий стан (02:00:00)
+    function resetAll() {
+      const currentEnd = Number(localStorage.getItem('timerEndTime'));
+      const currentPaused = Number(localStorage.getItem('pausedRemaining'));
+
+      if ((currentEnd && currentEnd > Date.now()) || currentPaused > 0) {
+        backupState = {
+          endTime: currentEnd > Date.now() ? currentEnd : 0,
+          pausedRemaining: currentPaused || 0
+        };
+        showToast('Таймер скинуто', true);
+      }
+
       localStorage.removeItem('timerEndTime');
+      localStorage.removeItem('pausedRemaining');
       localStorage.removeItem('lastPassedStep');
-      syncCloud(0);
+      syncCloud(0, 0);
       updateUI();
     }
 
     function updateUI() {
       const endTime = Number(localStorage.getItem('timerEndTime'));
+      const pausedRemaining = Number(localStorage.getItem('pausedRemaining'));
       const now = Date.now();
 
+      // СТАН 1: ПАУЗА
+      if (pausedRemaining > 0) {
+        const progress = Math.max(0, Math.min(1, pausedRemaining / TOTAL_MS));
+        ring.style.strokeDashoffset = circumference * (1 - progress);
+        ring.style.stroke = 'var(--warning)';
+        ambientGlow.style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%)';
+
+        timeDisplay.textContent = formatRemaining(pausedRemaining);
+        timeDisplay.classList.add('paused-blink');
+        endTimeLabel.textContent = 'На паузі';
+        nextCheckpointLabel.style.display = 'none';
+
+        statusDot.className = 'dot paused';
+        statusBadgeText.textContent = 'Пауза';
+
+        mainBtn.textContent = 'Оновити наново (2 год)';
+        pauseBtn.disabled = false;
+        pauseBtn.innerHTML = '▶️ Продовжити';
+        pauseBtn.className = 'secondary-btn resume-active';
+        resetBtn.disabled = false;
+        return;
+      }
+
+      timeDisplay.classList.remove('paused-blink');
+
+      // СТАН 2: ОЧІКУВАННЯ (не запущено)
       if (!endTime) {
         timeDisplay.textContent = '02:00:00';
         endTimeLabel.textContent = 'Готовий до запуску';
@@ -637,11 +729,16 @@
         ring.style.strokeDashoffset = 0;
         ring.style.stroke = 'var(--accent)';
         ambientGlow.style.background = 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)';
+
         mainBtn.textContent = 'Старт (2 год)';
-        stopBtn.disabled = true;
+        pauseBtn.disabled = true;
+        pauseBtn.innerHTML = '⏸ Пауза';
+        pauseBtn.className = 'secondary-btn';
+        resetBtn.disabled = true;
         return;
       }
 
+      // СТАН 3: АКТИВНИЙ ВІДЛІК
       const remaining = endTime - now;
 
       if (remaining > 0) {
@@ -653,10 +750,14 @@
         endTimeLabel.textContent = `Фініш о ${formatClock(endTime)}`;
         statusDot.className = 'dot active';
         statusBadgeText.textContent = 'Активний';
-        mainBtn.textContent = 'Оновити (2 год)';
-        stopBtn.disabled = false;
 
-        // Перевірка проходження 30-хвилинних інтервалів (1 = 30 хв, 2 = 60 хв, 3 = 90 хв)
+        mainBtn.textContent = 'Оновити (2 год)';
+        pauseBtn.disabled = false;
+        pauseBtn.innerHTML = '⏸ Пауза';
+        pauseBtn.className = 'secondary-btn pause-active';
+        resetBtn.disabled = false;
+
+        // 30-хвилинні проміжні сигнали
         const currentStep = Math.floor(elapsed / INTERVAL_MS);
         const lastPassedStep = Number(localStorage.getItem('lastPassedStep') || '0');
 
@@ -669,7 +770,6 @@
           showToast(`⏱ Минуло ${passedMins} хв (залишилось ${leftMins} хв)`, false);
         }
 
-        // Відображення наступного 30-хвилинного нагадування
         if (chk30Min.checked && currentStep < 3) {
           const nextStepTime = endTime - TOTAL_MS + (currentStep + 1) * INTERVAL_MS;
           const minsToNext = Math.max(1, Math.ceil((nextStepTime - now) / 60000));
@@ -682,7 +782,6 @@
           nextCheckpointLabel.style.display = 'none';
         }
 
-        // Зміна кольору за останні 15 хв
         if (remaining <= 15 * 60 * 1000) {
           ring.style.stroke = 'var(--warning)';
           ambientGlow.style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%)';
@@ -691,7 +790,7 @@
           ambientGlow.style.background = 'radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, transparent 70%)';
         }
       } else {
-        // Таймер завершився (2 години минули)
+        // СТАН 4: ЗАВЕРШЕНО
         timeDisplay.textContent = '00:00:00';
         endTimeLabel.textContent = '2 години минули!';
         nextCheckpointLabel.style.display = 'none';
@@ -700,8 +799,12 @@
         ring.style.strokeDashoffset = circumference;
         ring.style.stroke = 'var(--success)';
         ambientGlow.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, transparent 70%)';
+
         mainBtn.textContent = 'Запустити знову (2 год)';
-        stopBtn.disabled = false;
+        pauseBtn.disabled = true;
+        pauseBtn.innerHTML = '⏸ Пауза';
+        pauseBtn.className = 'secondary-btn';
+        resetBtn.disabled = false;
 
         if (localStorage.getItem('lastPassedStep') !== '4') {
           localStorage.setItem('lastPassedStep', '4');
@@ -711,10 +814,11 @@
       }
     }
 
-    mainBtn.addEventListener('click', startOrResetTimer);
-    stopBtn.addEventListener('click', stopTimer);
+    mainBtn.addEventListener('click', startOrRestart2H);
+    pauseBtn.addEventListener('click', togglePauseResume);
+    resetBtn.addEventListener('click', resetAll);
 
-    setInterval(updateUI, 500);
+    setInterval(updateUI, 400);
     setInterval(pullCloud, 5000);
     updateUI();
   </script>
