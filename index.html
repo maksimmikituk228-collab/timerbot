@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Таймер 2 год">
-  <title>Таймер 2 год + Пауза</title>
+  <title>Таймер 2 год + Sync</title>
   <style>
     :root {
       --bg-color: #090b10;
@@ -62,7 +62,6 @@
       transition: background 0.8s ease;
     }
 
-    /* Верхня панель */
     .header {
       width: 100%;
       max-width: 390px;
@@ -95,6 +94,14 @@
     .dot.paused { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
     .dot.done { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
+    .sync-tag {
+      font-size: 0.72rem;
+      color: var(--success);
+      margin-left: 4px;
+      display: none;
+    }
+    .sync-tag.on { display: inline; }
+
     .icon-btn {
       width: 38px;
       height: 38px;
@@ -110,7 +117,6 @@
     }
     .icon-btn:active { transform: scale(0.92); }
 
-    /* Центральне кільце */
     .timer-wrapper {
       position: relative;
       width: 266px;
@@ -157,9 +163,7 @@
       transition: opacity 0.3s ease;
     }
 
-    #time-display.paused-blink {
-      opacity: 0.7;
-    }
+    #time-display.paused-blink { opacity: 0.7; }
 
     #end-time-label {
       margin-top: 6px;
@@ -178,7 +182,6 @@
       display: inline-block;
     }
 
-    /* Блок керування */
     .controls {
       width: 100%;
       max-width: 390px;
@@ -225,34 +228,26 @@
       justify-content: center;
       gap: 6px;
     }
-
-    .secondary-btn:not(:disabled):active {
-      transform: scale(0.97);
-    }
-
+    .secondary-btn:not(:disabled):active { transform: scale(0.97); }
     .secondary-btn.pause-active {
       background: rgba(245, 158, 11, 0.14);
       border-color: rgba(245, 158, 11, 0.45);
       color: #fbbf24;
     }
-
     .secondary-btn.resume-active {
       background: rgba(16, 185, 129, 0.16);
       border-color: rgba(16, 185, 129, 0.45);
       color: #34d399;
     }
-
     .secondary-btn.reset-btn:not(:disabled):active {
       color: var(--danger);
       border-color: rgba(239, 68, 68, 0.45);
     }
-
     .secondary-btn:disabled {
       opacity: 0.32;
       cursor: default;
     }
 
-    /* Плаваюче сповіщення (Toast / Undo) */
     .toast {
       position: fixed;
       bottom: calc(env(safe-area-inset-bottom) + 16px);
@@ -284,7 +279,6 @@
       cursor: pointer;
     }
 
-    /* Модальне вікно налаштувань */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -307,7 +301,7 @@
       border: 1px solid var(--border-color);
       border-radius: 24px;
       padding: 20px;
-      max-height: 82dvh;
+      max-height: 84dvh;
       overflow-y: auto;
     }
 
@@ -315,9 +309,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-    .modal-header h3 { margin: 0; font-size: 1.1rem; }
+    .modal-header h3 { margin: 0; font-size: 1.08rem; }
 
     .setting-row {
       display: flex;
@@ -346,19 +340,20 @@
       border: 1px solid var(--border-color);
       background: rgba(0, 0, 0, 0.35);
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
+      user-select: text;
     }
 
-    .test-btn {
+    .action-small-btn {
       width: 100%;
-      margin-top: 12px;
+      margin-top: 10px;
       padding: 11px;
       border-radius: 12px;
       border: 1px solid rgba(56, 189, 248, 0.3);
       background: rgba(56, 189, 248, 0.12);
       color: var(--accent);
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       cursor: pointer;
     }
   </style>
@@ -367,21 +362,19 @@
 
   <div class="ambient-glow" id="ambient-glow"></div>
 
-  <!-- Верхній бар -->
   <div class="header">
     <div class="badge">
       <span class="dot" id="status-dot"></span>
       <span id="status-badge-text">Очікування</span>
+      <span class="sync-tag" id="sync-tag">• Sync</span>
     </div>
     <button class="icon-btn" id="open-settings-btn" title="Налаштування">⚙️</button>
   </div>
 
-  <!-- Центральний круговий прогрес -->
   <div class="timer-wrapper">
     <svg class="progress-ring" width="266" height="266">
       <circle class="ring-bg" cx="133" cy="133" r="120"></circle>
       <circle class="ring-progress" id="ring-progress" cx="133" cy="133" r="120"></circle>
-      <!-- Поділки кожні 30 хв -->
       <line x1="253" y1="133" x2="262" y2="133" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
       <line x1="133" y1="253" x2="133" y2="262" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
       <line x1="13" y1="133" x2="4" y2="133" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
@@ -395,7 +388,6 @@
     </div>
   </div>
 
-  <!-- Кнопки керування -->
   <div class="controls">
     <button class="primary-btn" id="main-btn">Старт (2 год)</button>
     <div class="secondary-row">
@@ -404,24 +396,22 @@
     </div>
   </div>
 
-  <!-- Плаваюче сповіщення -->
   <div class="toast" id="toast">
     <span id="toast-msg">Таймер оновлено</span>
     <button id="toast-action-btn" style="display: none;">Скасувати</button>
   </div>
 
-  <!-- Модальне вікно налаштувань -->
   <div class="modal-backdrop" id="settings-modal">
     <div class="modal">
       <div class="modal-header">
-        <h3>Налаштування нагадувань</h3>
+        <h3>Налаштування та Sync</h3>
         <button class="icon-btn" id="close-settings-btn">✕</button>
       </div>
 
       <div class="setting-row">
         <div>
           <div class="setting-title">Нагадування кожні 30 хв</div>
-          <div class="setting-desc">Звуковий сигнал + пуш на 30, 60 та 90 хвилині роботи.</div>
+          <div class="setting-desc">Звук та повідомлення на 30, 60 і 90 хвилині.</div>
         </div>
         <input type="checkbox" id="chk-30min" checked>
       </div>
@@ -429,26 +419,27 @@
       <div class="setting-row">
         <div>
           <div class="setting-title">Команда iOS «Timer30m»</div>
-          <div class="setting-desc">Запускає системний 30-хв таймер iPhone (дзвонить навіть на заблокованому екрані).</div>
+          <div class="setting-desc">Запускає системний таймер iPhone (дзвонить на заблокованому екрані).</div>
         </div>
         <input type="checkbox" id="chk-ios-shortcut">
       </div>
 
       <div class="setting-row" style="flex-direction: column; align-items: stretch;">
         <div>
-          <div class="setting-title">Firebase URL (синхронізація з віджетом)</div>
-          <div class="setting-desc">Необов'язково. Вставте посилання бази даних для синхронізації зі Scriptable.</div>
+          <div class="setting-title">JSONBlob лінк (синхронізація без бази)</div>
+          <div class="setting-desc">Вставте посилання з jsonblob.com — сайт і віджет Scriptable будуть синхронними.</div>
         </div>
-        <input type="url" class="input-field" id="firebase-url-input" placeholder="https://your-app.firebaseio.com">
+        <input type="url" class="input-field" id="sync-url-input" placeholder="https://jsonblob.com/13456789...">
+        <button class="action-small-btn" id="copy-scriptable-btn">📋 Скопіювати код віджета для Scriptable</button>
       </div>
 
-      <button class="test-btn" id="test-chime-btn">🔔 Перевірити звук 30-хв нагадування</button>
+      <button class="action-small-btn" id="test-chime-btn">🔔 Перевірити звук 30-хв сигналу</button>
     </div>
   </div>
 
   <script>
-    const TOTAL_MS = 2 * 60 * 60 * 1000; // 2 години
-    const INTERVAL_MS = 30 * 60 * 1000;   // 30 хвилин
+    const TOTAL_MS = 2 * 60 * 60 * 1000;
+    const INTERVAL_MS = 30 * 60 * 1000;
 
     const ring = document.getElementById('ring-progress');
     const radius = 120;
@@ -461,6 +452,7 @@
     const nextCheckpointLabel = document.getElementById('next-checkpoint-label');
     const statusDot = document.getElementById('status-dot');
     const statusBadgeText = document.getElementById('status-badge-text');
+    const syncTag = document.getElementById('sync-tag');
     const ambientGlow = document.getElementById('ambient-glow');
 
     const mainBtn = document.getElementById('main-btn');
@@ -473,14 +465,27 @@
 
     const chk30Min = document.getElementById('chk-30min');
     const chkIosShortcut = document.getElementById('chk-ios-shortcut');
-    const firebaseInput = document.getElementById('firebase-url-input');
+    const syncUrlInput = document.getElementById('sync-url-input');
 
-    let backupState = null; // для кнопки "Скасувати"
+    let backupState = null;
     let toastTimeout = null;
+    let isPushing = false;
+
+    // Автоматично перетворюємо звичайний лінк jsonblob.com/ID у API-формат jsonblob.com/api/jsonBlob/ID
+    function normalizeSyncUrl(raw) {
+      let url = (raw || '').trim();
+      if (!url) return '';
+      if (url.includes('jsonblob.com/') && !url.includes('/api/jsonBlob/')) {
+        const id = url.split('jsonblob.com/')[1].split('/')[0].split('?')[0];
+        if (id) return `https://jsonblob.com/api/jsonBlob/${id}`;
+      }
+      return url;
+    }
 
     chk30Min.checked = localStorage.getItem('remind30m') !== 'false';
     chkIosShortcut.checked = localStorage.getItem('useIosShortcut') === 'true';
-    firebaseInput.value = localStorage.getItem('firebaseUrl') || '';
+    syncUrlInput.value = localStorage.getItem('syncUrl') || '';
+    if (syncUrlInput.value) syncTag.classList.add('on');
 
     chk30Min.addEventListener('change', () => {
       localStorage.setItem('remind30m', chk30Min.checked);
@@ -489,9 +494,97 @@
     chkIosShortcut.addEventListener('change', () => {
       localStorage.setItem('useIosShortcut', chkIosShortcut.checked);
     });
-    firebaseInput.addEventListener('change', () => {
-      localStorage.setItem('firebaseUrl', firebaseInput.value.trim().replace(/\/$/, ''));
+    syncUrlInput.addEventListener('change', () => {
+      const normalized = normalizeSyncUrl(syncUrlInput.value);
+      syncUrlInput.value = normalized;
+      localStorage.setItem('syncUrl', normalized);
+      syncTag.classList.toggle('on', Boolean(normalized));
+      if (normalized) {
+        pullCloud();
+        showToast('🔗 Синхронізацію підключено');
+      }
     });
+
+    // Генерація коду для віджета Scriptable з уже вшитим посиланням
+    document.getElementById('copy-scriptable-btn').onclick = () => {
+      const apiUrl = normalizeSyncUrl(syncUrlInput.value) || 'ВСТАВ_СЮДИ_JSONBLOB_API_ЛІНК';
+      const scriptableCode = `// Віджет таймера 2 год для iOS (Scriptable)
+const API_URL = "${apiUrl}";
+const TOTAL_MS = 7200000;
+
+async function sync() {
+  const req = new Request(API_URL);
+  req.headers = { "Accept": "application/json" };
+  return await req.loadJSON();
+}
+
+async function push(endTime, pausedRemaining) {
+  const req = new Request(API_URL);
+  req.method = "PUT";
+  req.headers = { "Content-Type": "application/json", "Accept": "application/json" };
+  req.body = JSON.stringify({ endTime, pausedRemaining, updatedAt: Date.now() });
+  await req.loadJSON();
+}
+
+// Якщо натиснули на віджет — перезапускаємо 2 години і відкриваємо сайт
+if (config.runsInApp) {
+  await push(Date.now() + TOTAL_MS, 0);
+}
+
+const data = await sync();
+const w = new ListWidget();
+w.backgroundColor = new Color("#090b10");
+w.setPadding(14, 16, 14, 16);
+
+const title = w.addText("ТАЙМЕР 2 ГОД");
+title.font = Font.boldSystemFont(11);
+title.textColor = new Color("#94a3b8");
+w.addSpacer(6);
+
+let statusStr = "02:00:00";
+let subStr = "Натисни для старту";
+let accentColor = new Color("#38bdf8");
+
+if (data.pausedRemaining > 0) {
+  const sec = Math.ceil(data.pausedRemaining / 1000);
+  const h = String(Math.floor(sec / 3600)).padStart(2, "0");
+  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+  statusStr = \`\${h}:\${m}\`;
+  subStr = "⏸ На паузі";
+  accentColor = new Color("#f59e0b");
+} else if (data.endTime > Date.now()) {
+  const rem = data.endTime - Date.now();
+  const sec = Math.ceil(rem / 1000);
+  const h = String(Math.floor(sec / 3600)).padStart(2, "0");
+  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+  const d = new Date(data.endTime);
+  const endClock = \`\${String(d.getHours()).padStart(2,"0")}:\${String(d.getMinutes()).padStart(2,"0")}\`;
+  statusStr = \`\${h}:\${m}\`;
+  subStr = \`Фініш о \${endClock}\`;
+} else if (data.endTime > 0) {
+  statusStr = "00:00";
+  subStr = "✅ Час вийшов!";
+  accentColor = new Color("#10b981");
+}
+
+const timeTxt = w.addText(statusStr);
+timeTxt.font = Font.boldMonospacedSystemFont(30);
+timeTxt.textColor = accentColor;
+w.addSpacer(4);
+
+const subTxt = w.addText(subStr);
+subTxt.font = Font.mediumSystemFont(12);
+subTxt.textColor = new Color("#cbd5e1");
+
+Script.setWidget(w);
+Script.complete();`;
+
+      navigator.clipboard.writeText(scriptableCode).then(() => {
+        showToast('📋 Код Scriptable скопійовано!');
+      }).catch(() => {
+        alert(scriptableCode);
+      });
+    };
 
     const settingsModal = document.getElementById('settings-modal');
     document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('open');
@@ -559,22 +652,25 @@
     };
 
     async function syncCloud(endTimeVal, pausedVal = 0) {
-      const baseUrl = localStorage.getItem('firebaseUrl');
-      if (!baseUrl) return;
+      const apiUrl = localStorage.getItem('syncUrl');
+      if (!apiUrl) return;
+      isPushing = true;
       try {
-        await fetch(`${baseUrl}/timer.json`, {
+        await fetch(apiUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ endTime: endTimeVal, pausedRemaining: pausedVal, updatedAt: Date.now() })
         });
-      } catch (e) {}
+      } catch (e) {} finally {
+        setTimeout(() => { isPushing = false; }, 1000);
+      }
     }
 
     async function pullCloud() {
-      const baseUrl = localStorage.getItem('firebaseUrl');
-      if (!baseUrl) return;
+      const apiUrl = localStorage.getItem('syncUrl');
+      if (!apiUrl || isPushing) return;
       try {
-        const res = await fetch(`${baseUrl}/timer.json`);
+        const res = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
         const data = await res.json();
         if (!data) return;
 
@@ -610,7 +706,6 @@
       return `${h}:${m}:${s}`;
     }
 
-    // 1. Старт або повне оновлення на 2 години
     function startOrRestart2H() {
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
@@ -645,21 +740,18 @@
       }
     }
 
-    // 2. Пауза або Продовжити з того ж місця
     function togglePauseResume() {
       const now = Date.now();
       const endTime = Number(localStorage.getItem('timerEndTime'));
       const pausedRemaining = Number(localStorage.getItem('pausedRemaining'));
 
       if (endTime && endTime > now) {
-        // Ставимо на ПАУЗУ: фіксуємо точний залишок мілісекунд
         const remaining = endTime - now;
         localStorage.removeItem('timerEndTime');
         localStorage.setItem('pausedRemaining', remaining);
         syncCloud(0, remaining);
         showToast('⏸ Таймер на паузі', false);
       } else if (pausedRemaining > 0) {
-        // ПРОДОВЖУЄМО з того ж місця: додаємо збережений залишок до поточного часу
         const resumedEnd = now + pausedRemaining;
         localStorage.removeItem('pausedRemaining');
         localStorage.setItem('timerEndTime', resumedEnd);
@@ -669,7 +761,6 @@
       updateUI();
     }
 
-    // 3. Повне скидання в початковий стан (02:00:00)
     function resetAll() {
       const currentEnd = Number(localStorage.getItem('timerEndTime'));
       const currentPaused = Number(localStorage.getItem('pausedRemaining'));
@@ -694,7 +785,6 @@
       const pausedRemaining = Number(localStorage.getItem('pausedRemaining'));
       const now = Date.now();
 
-      // СТАН 1: ПАУЗА
       if (pausedRemaining > 0) {
         const progress = Math.max(0, Math.min(1, pausedRemaining / TOTAL_MS));
         ring.style.strokeDashoffset = circumference * (1 - progress);
@@ -719,7 +809,6 @@
 
       timeDisplay.classList.remove('paused-blink');
 
-      // СТАН 2: ОЧІКУВАННЯ (не запущено)
       if (!endTime) {
         timeDisplay.textContent = '02:00:00';
         endTimeLabel.textContent = 'Готовий до запуску';
@@ -738,7 +827,6 @@
         return;
       }
 
-      // СТАН 3: АКТИВНИЙ ВІДЛІК
       const remaining = endTime - now;
 
       if (remaining > 0) {
@@ -757,7 +845,6 @@
         pauseBtn.className = 'secondary-btn pause-active';
         resetBtn.disabled = false;
 
-        // 30-хвилинні проміжні сигнали
         const currentStep = Math.floor(elapsed / INTERVAL_MS);
         const lastPassedStep = Number(localStorage.getItem('lastPassedStep') || '0');
 
@@ -790,7 +877,6 @@
           ambientGlow.style.background = 'radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, transparent 70%)';
         }
       } else {
-        // СТАН 4: ЗАВЕРШЕНО
         timeDisplay.textContent = '00:00:00';
         endTimeLabel.textContent = '2 години минули!';
         nextCheckpointLabel.style.display = 'none';
@@ -819,7 +905,7 @@
     resetBtn.addEventListener('click', resetAll);
 
     setInterval(updateUI, 400);
-    setInterval(pullCloud, 5000);
+    setInterval(pullCloud, 4000);
     updateUI();
   </script>
 </body>
