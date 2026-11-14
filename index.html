@@ -349,6 +349,7 @@
       margin-top: 6px;
       font-size: 0.78rem;
       color: var(--text-muted);
+      word-break: break-word;
     }
 
     .action-small-btn {
@@ -434,10 +435,10 @@
       <div class="setting-row" style="flex-direction: column; align-items: stretch;">
         <div>
           <div class="setting-title">npoint.io API лінк (синхронізація)</div>
-          <div class="setting-desc">Вставте посилання вигляду https://api.npoint.io/...</div>
+          <div class="setting-desc">Вже підключено ваш лінк. Можна змінити за потреби.</div>
         </div>
-        <input type="url" class="input-field" id="sync-url-input" placeholder="https://api.npoint.io/xxxxxxxxxxxx">
-        <div class="sync-status-box" id="sync-status-box">Статус: не підключено</div>
+        <input type="url" class="input-field" id="sync-url-input" placeholder="https://api.npoint.io/7b97722d15c0bc9bd3dc">
+        <div class="sync-status-box" id="sync-status-box">Статус: підключення...</div>
         <button class="action-small-btn" id="copy-scriptable-btn">📋 Скопіювати код віджета для Scriptable</button>
       </div>
 
@@ -446,6 +447,7 @@
   </div>
 
   <script>
+    const DEFAULT_SYNC_URL = "https://api.npoint.io/7b97722d15c0bc9bd3dc";
     const TOTAL_MS = 2 * 60 * 60 * 1000;
     const INTERVAL_MS = 30 * 60 * 1000;
 
@@ -483,20 +485,22 @@
     function normalizeSyncUrl(raw) {
       let url = (raw || '').trim();
       if (!url) return '';
-      if (url.includes('npoint.io/') && !url.includes('api.npoint.io')) {
-        const id = url.split('npoint.io/')[1].split('/')[0].split('?')[0];
-        if (id) return `https://api.npoint.io/${id}`;
+      // Витягуємо 20-символьний ID npoint з будь-якого формату посилання
+      const match = url.match(/npoint\.io\/(?:docs\/)?([a-zA-Z0-9]+)/);
+      if (match && match[1]) {
+        return `https://api.npoint.io/${match[1]}`;
       }
       return url;
     }
 
     chk30Min.checked = localStorage.getItem('remind30m') !== 'false';
     chkIosShortcut.checked = localStorage.getItem('useIosShortcut') === 'true';
-    syncUrlInput.value = localStorage.getItem('syncUrl') || '';
-    if (syncUrlInput.value) {
-      syncTag.classList.add('on');
-      pullCloud();
-    }
+
+    // Очищаємо старий битий лінк, якщо там потрапило слово docs
+    const savedUrl = localStorage.getItem('syncUrl');
+    const initialUrl = savedUrl ? normalizeSyncUrl(savedUrl) : DEFAULT_SYNC_URL;
+    localStorage.setItem('syncUrl', initialUrl);
+    syncUrlInput.value = initialUrl;
 
     chk30Min.addEventListener('change', () => {
       localStorage.setItem('remind30m', chk30Min.checked);
@@ -512,7 +516,7 @@
     });
 
     document.getElementById('copy-scriptable-btn').onclick = () => {
-      const apiUrl = normalizeSyncUrl(syncUrlInput.value) || 'ВСТАВ_СЮДИ_NPOINT_API_ЛІНК';
+      const apiUrl = normalizeSyncUrl(syncUrlInput.value) || DEFAULT_SYNC_URL;
       const scriptableCode = `// Віджет таймера 2 год для iOS (Scriptable)
 const API_URL = "${apiUrl}";
 const TOTAL_MS = 7200000;
@@ -639,14 +643,16 @@ Script.complete();`;
 
     toastActionBtn.onclick = () => {
       if (backupState) {
+        const ts = Date.now();
+        localStorage.setItem('localUpdatedAt', String(ts));
         if (backupState.endTime) {
           localStorage.setItem('timerEndTime', backupState.endTime);
           localStorage.removeItem('pausedRemaining');
-          syncCloud(backupState.endTime, 0);
+          syncCloud(backupState.endTime, 0, ts);
         } else if (backupState.pausedRemaining) {
           localStorage.setItem('pausedRemaining', backupState.pausedRemaining);
           localStorage.removeItem('timerEndTime');
-          syncCloud(0, backupState.pausedRemaining);
+          syncCloud(0, backupState.pausedRemaining, ts);
         }
         backupState = null;
         toast.classList.remove('show');
@@ -654,8 +660,7 @@ Script.complete();`;
       }
     };
 
-    // npoint.io приймає оновлення через POST
-    async function syncCloud(endTimeVal, pausedVal = 0) {
+    async function syncCloud(endTimeVal, pausedVal = 0, ts = Date.now()) {
       const apiUrl = normalizeSyncUrl(localStorage.getItem('syncUrl'));
       if (!apiUrl) return;
       isPushing = true;
@@ -663,7 +668,7 @@ Script.complete();`;
         const res = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endTime: endTimeVal, pausedRemaining: pausedVal, updatedAt: Date.now() })
+          body: JSON.stringify({ endTime: endTimeVal, pausedRemaining: pausedVal, updatedAt: ts })
         });
         if (res.ok) {
           syncTag.className = 'sync-tag on';
@@ -675,9 +680,9 @@ Script.complete();`;
       } catch (e) {
         syncTag.className = 'sync-tag err';
         syncTag.textContent = '• Помилка';
-        syncStatusBox.textContent = 'Статус: ❌ Помилка зʼєднання (перевірте лінк)';
+        syncStatusBox.textContent = 'Статус: ❌ Помилка запису (' + e.message + ')';
       } finally {
-        setTimeout(() => { isPushing = false; }, 1000);
+        setTimeout(() => { isPushing = false; }, 1200);
       }
     }
 
@@ -685,7 +690,7 @@ Script.complete();`;
       const apiUrl = normalizeSyncUrl(localStorage.getItem('syncUrl'));
       if (!apiUrl || isPushing) return;
       try {
-        const res = await fetch(apiUrl + '?t=' + Date.now());
+        const res = await fetch(apiUrl);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         syncTag.className = 'sync-tag on';
@@ -693,6 +698,13 @@ Script.complete();`;
         syncStatusBox.textContent = 'Статус: ✅ Звʼязок з хмарою є';
         if (!data) return;
 
+        // Ігноруємо старі дані з хмари, якщо локальна дія була пізніше
+        const localUpdated = Number(localStorage.getItem('localUpdatedAt')) || 0;
+        const remoteUpdated = Number(data.updatedAt) || 0;
+        if (remoteUpdated === 0 && localUpdated > 0) return;
+        if (remoteUpdated > 0 && remoteUpdated < localUpdated) return;
+
+        localStorage.setItem('localUpdatedAt', String(remoteUpdated));
         const localEnd = Number(localStorage.getItem('timerEndTime')) || 0;
         const localPaused = Number(localStorage.getItem('pausedRemaining')) || 0;
 
@@ -712,7 +724,7 @@ Script.complete();`;
       } catch (e) {
         syncTag.className = 'sync-tag err';
         syncTag.textContent = '• Помилка';
-        syncStatusBox.textContent = 'Статус: ❌ Не вдалося підключитись (перевірте лінк)';
+        syncStatusBox.textContent = 'Статус: ❌ Помилка читання (' + e.message + ')';
       }
     }
 
@@ -753,7 +765,8 @@ Script.complete();`;
       localStorage.removeItem('pausedRemaining');
       localStorage.setItem('timerEndTime', newEnd);
       localStorage.setItem('lastPassedStep', '0');
-      syncCloud(newEnd, 0);
+      localStorage.setItem('localUpdatedAt', String(now));
+      syncCloud(newEnd, 0, now);
       updateUI();
 
       if (chkIosShortcut.checked) {
@@ -768,29 +781,32 @@ Script.complete();`;
       const endTime = Number(localStorage.getItem('timerEndTime'));
       const pausedRemaining = Number(localStorage.getItem('pausedRemaining'));
 
+      localStorage.setItem('localUpdatedAt', String(now));
+
       if (endTime && endTime > now) {
         const remaining = endTime - now;
         localStorage.removeItem('timerEndTime');
         localStorage.setItem('pausedRemaining', remaining);
-        syncCloud(0, remaining);
+        syncCloud(0, remaining, now);
         showToast('⏸ Таймер на паузі', false);
       } else if (pausedRemaining > 0) {
         const resumedEnd = now + pausedRemaining;
         localStorage.removeItem('pausedRemaining');
         localStorage.setItem('timerEndTime', resumedEnd);
-        syncCloud(resumedEnd, 0);
+        syncCloud(resumedEnd, 0, now);
         showToast('▶️ Відлік продовжено', false);
       }
       updateUI();
     }
 
     function resetAll() {
+      const now = Date.now();
       const currentEnd = Number(localStorage.getItem('timerEndTime'));
       const currentPaused = Number(localStorage.getItem('pausedRemaining'));
 
-      if ((currentEnd && currentEnd > Date.now()) || currentPaused > 0) {
+      if ((currentEnd && currentEnd > now) || currentPaused > 0) {
         backupState = {
-          endTime: currentEnd > Date.now() ? currentEnd : 0,
+          endTime: currentEnd > now ? currentEnd : 0,
           pausedRemaining: currentPaused || 0
         };
         showToast('Таймер скинуто', true);
@@ -799,7 +815,8 @@ Script.complete();`;
       localStorage.removeItem('timerEndTime');
       localStorage.removeItem('pausedRemaining');
       localStorage.removeItem('lastPassedStep');
-      syncCloud(0, 0);
+      localStorage.setItem('localUpdatedAt', String(now));
+      syncCloud(0, 0, now);
       updateUI();
     }
 
@@ -929,6 +946,7 @@ Script.complete();`;
 
     setInterval(updateUI, 400);
     setInterval(pullCloud, 4000);
+    pullCloud();
     updateUI();
   </script>
 </body>
