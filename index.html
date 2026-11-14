@@ -1,42 +1,30 @@
 <!DOCTYPE html>
-<html lang="uk" class="dark">
+<html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <!-- Адаптивний viewport під iPhone XS (375x812) та виріз екрана (notch / safe-area) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-
-  <!-- Налаштування iOS Safari PWA при додаванні на робочий екран -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Таймер 2 год" />
-  <meta name="theme-color" content="#090d16" />
-  <title>Таймер 2 години — iOS PWA & Cloud Sync</title>
-
-  <!-- Векторна іконка (UTF-8 SVG Data URI без base64) для Safari та iOS Home Screen -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='100%25' stop-color='%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='42' fill='%23090d16'/%3E%3Ccircle cx='90' cy='90' r='56' fill='none' stroke='%231e293b' stroke-width='12'/%3E%3Ccircle cx='90' cy='90' r='56' fill='none' stroke='url(%23g)' stroke-width='12' stroke-linecap='round' stroke-dasharray='265 352' transform='rotate(-90 90 90)'/%3E%3Cpath d='M90 62v30l20 12' fill='none' stroke='%23ffffff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='100%25' stop-color='%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' fill='%23090d16'/%3E%3Ccircle cx='90' cy='90' r='56' fill='none' stroke='%231e293b' stroke-width='12'/%3E%3Ccircle cx='90' cy='90' r='56' fill='none' stroke='url(%23g)' stroke-width='12' stroke-linecap='round' stroke-dasharray='265 352' transform='rotate(-90 90 90)'/%3E%3Cpath d='M90 62v30l20 12' fill='none' stroke='%23ffffff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
-
-  <!-- Підтримка запуску всередині Telegram Mini App, якщо відкрито через бот -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Шрифт Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Таймер 2 год">
+  <title>Таймер 2 год + 30 хв</title>
   <style>
-    /* Критичні налаштування під iPhone XS Safari (375x812, 100dvh, safe-area) */
     :root {
-      --safe-top: env(safe-area-inset-top, 14px);
-      --safe-bottom: env(safe-area-inset-bottom, 18px);
+      --bg-color: #090b10;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border-color: rgba(255, 255, 255, 0.09);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --warning: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
     }
 
     * {
-      -webkit-tap-highlight-color: transparent;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
     html, body {
@@ -44,1315 +32,691 @@
       padding: 0;
       width: 100%;
       height: 100dvh;
-      min-height: 100dvh;
-      background-color: #090d16;
-      color: #f8fafc;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      overscroll-behavior: none;
       overflow: hidden;
+      overscroll-behavior: none;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: calc(env(safe-area-inset-top) + 16px);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+      padding-left: 20px;
+      padding-right: 20px;
     }
 
-    /* Моноширинні цифри, щоб час не стрибав щосекунди */
-    .tabular-nums {
-      font-variant-numeric: tabular-nums;
-      font-feature-settings: "tnum";
+    /* Динамічне світіння фону */
+    .ambient-glow {
+      position: fixed;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      filter: blur(45px);
+      z-index: 0;
+      pointer-events: none;
+      transition: background 0.8s ease;
     }
 
-    /* Скляні поверхні (Dark Cosmic Glassmorphism) */
-    .glass-surface {
-      background: rgba(15, 23, 42, 0.58);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Верхня панель */
+    .header {
+      width: 100%;
+      max-width: 390px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
     }
 
-    .glass-pill {
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.09);
+    .badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .glass-modal {
-      background: rgba(11, 17, 30, 0.92);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #64748b;
+    }
+    .dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .dot.done { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+    .icon-btns {
+      display: flex;
+      gap: 10px;
     }
 
-    /* Плавні переходи фонових радіальних сфер */
-    #ambient-orb-primary,
-    #ambient-orb-secondary {
-      transition: background 0.85s ease, transform 0.85s ease, opacity 0.85s ease;
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .icon-btn:active { transform: scale(0.92); }
+
+    /* Центральне кільце */
+    .timer-wrapper {
+      position: relative;
+      width: 266px;
+      height: 266px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
     }
 
-    /* Пульсація при завершенні відліку (Emerald / Rose) */
-    @keyframes finishedAmbientPulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.92;
-      }
-      50% {
-        transform: scale(1.09);
-        opacity: 0.62;
-      }
-    }
-
-    .ambient-finished-pulse {
-      animation: finishedAmbientPulse 2.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    /* Плавне заповнення SVG-кільця */
-    #progress-ring-arc {
-      transition: stroke-dashoffset 0.3s linear;
-      transform: rotate(-90deg);
-      transform-origin: 50% 50%;
-    }
-
-    /* Ripple-ефект при натисканні на головну кнопку */
-    .ripple-wave {
+    svg.progress-ring {
       position: absolute;
-      border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.35);
-      transform: scale(0);
-      animation: rippleExpand 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      top: 0;
+      left: 0;
+      transform: rotate(-90deg);
+    }
+
+    circle.ring-bg {
+      fill: transparent;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 10;
+    }
+
+    circle.ring-progress {
+      fill: transparent;
+      stroke: var(--accent);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.35s linear, stroke 0.5s ease;
+    }
+
+    /* Мітки 30, 60, 90 хв на кільці */
+    .checkpoint-markers {
+      position: absolute;
+      inset: 0;
       pointer-events: none;
     }
 
-    @keyframes rippleExpand {
-      to {
-        transform: scale(3.2);
-        opacity: 0;
-      }
+    .timer-content {
+      text-align: center;
+      z-index: 3;
     }
 
-    /* Анімація появи плаваючого тосту скасування */
-    @keyframes toastRise {
-      from {
-        opacity: 0;
-        transform: translate(-50%, 20px) scale(0.96);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, 0) scale(1);
-      }
+    #time-display {
+      font-size: 3.1rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
     }
 
-    .toast-visible {
-      animation: toastRise 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    #end-time-label {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
     }
 
-    /* Кастомні перемикачі (Toggle Switches) */
-    .toggle-track {
-      transition: background-color 0.25s ease;
-    }
-    .toggle-thumb {
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    #next-checkpoint-label {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: inline-block;
     }
 
-    /* Скрол всередині модальних вікон */
-    .modal-scroll::-webkit-scrollbar {
-      width: 4px;
+    /* Блок керування */
+    .controls {
+      width: 100%;
+      max-width: 390px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 2;
     }
-    .modal-scroll::-webkit-scrollbar-track {
-      background: transparent;
+
+    .primary-btn {
+      width: 100%;
+      height: 58px;
+      border-radius: 18px;
+      border: none;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5);
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.2s;
     }
-    .modal-scroll::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.25);
-      border-radius: 9999px;
+    .primary-btn:active { transform: scale(0.97); }
+
+    .secondary-btn {
+      width: 100%;
+      height: 46px;
+      border-radius: 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .secondary-btn:not(:disabled):active {
+      transform: scale(0.97);
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .secondary-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* Плаваюче сповіщення (Toast / Undo) */
+    .toast {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      width: calc(100% - 40px);
+      max-width: 370px;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      z-index: 50;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast span { font-size: 0.88rem; color: #f1f5f9; }
+    .toast button {
+      background: rgba(56, 189, 248, 0.18);
+      border: none;
+      color: var(--accent);
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    /* Модальне вікно налаштувань */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 400px;
+      background: #111622;
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+      max-height: 82dvh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 { margin: 0; font-size: 1.1rem; }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-title { font-size: 0.92rem; font-weight: 600; }
+    .setting-desc { font-size: 0.76rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35; }
+
+    input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .input-field {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.35);
+      color: #fff;
+      font-size: 0.85rem;
+    }
+
+    .test-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
     }
   </style>
 </head>
-<body class="relative flex flex-col justify-between antialiased selection:bg-sky-500/30">
+<body>
 
-  <!-- Фонові космічні радіальні сфери світіння, які змінюють колір залежно від стану -->
-  <div class="pointer-events-none fixed inset-0 overflow-hidden z-0 flex items-center justify-center">
-    <div id="ambient-orb-primary"
-         class="w-[380px] h-[380px] sm:w-[500px] sm:h-[500px] rounded-full blur-3xl opacity-90"
-         style="background: radial-gradient(circle, rgba(99, 102, 241, 0.30) 0%, rgba(99, 102, 241, 0.06) 52%, transparent 74%);">
+  <div class="ambient-glow" id="ambient-glow"></div>
+
+  <!-- Верхній бар -->
+  <div class="header">
+    <div class="badge">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-badge-text">Очікування</span>
     </div>
-    <div id="ambient-orb-secondary"
-         class="absolute -bottom-24 w-[320px] h-[320px] rounded-full blur-3xl opacity-70"
-         style="background: radial-gradient(circle, rgba(79, 70, 229, 0.18) 0%, transparent 70%);">
-    </div>
-  </div>
-
-  <!-- Головний контейнер екрана (ідеально вписується в 375x812 iPhone XS без скролу) -->
-  <main class="relative z-10 w-full max-w-md h-full mx-auto px-5 flex flex-col justify-between"
-        style="padding-top: calc(var(--safe-top) + 8px); padding-bottom: calc(var(--safe-bottom) + 14px);">
-
-    <!-- 1. Верхня панель з урахуванням вирізу iPhone XS (Notch Safe Area) -->
-    <header class="flex items-center justify-between gap-2">
-      <!-- Індикатор статусу хмарної синхронізації зліва -->
-      <button id="sync-status-pill" type="button" title="Натисніть для перевірки синхронізації"
-              class="glass-pill px-3.5 py-2 rounded-full flex items-center gap-2 text-xs font-semibold text-slate-200 active:scale-95 transition-transform touch-manipulation">
-        <span id="sync-dot" class="w-2 h-2 rounded-full bg-indigo-400"></span>
-        <span id="sync-label">Локально</span>
-      </button>
-
-      <!-- Праві іконки: Налаштування (⚙️) та Інструкція (?) -->
-      <div class="flex items-center gap-2">
-        <button id="open-settings-btn" type="button" aria-label="Налаштування"
-                class="glass-pill w-10 h-10 rounded-full flex items-center justify-center text-slate-200 hover:bg-slate-800/80 active:scale-90 transition-all touch-manipulation">
-          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </button>
-
-        <button id="open-guide-btn" type="button" aria-label="Інструкція"
-                class="glass-pill w-10 h-10 rounded-full flex items-center justify-center text-slate-200 hover:bg-slate-800/80 active:scale-90 transition-all touch-manipulation">
-          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- 2. Центральна Hero-секція: 260px круговий SVG-прогрес та головна тактильна кнопка -->
-    <section class="flex-1 flex flex-col items-center justify-center my-auto">
-
-      <!-- 260px Кругове SVG-кільце таймера -->
-      <div class="relative w-[260px] h-[260px] flex items-center justify-center">
-        <svg class="w-[260px] h-[260px] overflow-visible" viewBox="0 0 260 260">
-          <defs>
-            <linearGradient id="progress-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop id="ring-stop-1" offset="0%" stop-color="#6366f1" />
-              <stop id="ring-stop-2" offset="100%" stop-color="#818cf8" />
-            </linearGradient>
-          </defs>
-
-          <!-- Зовнішнє декоративне світіння контуру -->
-          <circle
-            cx="130"
-            cy="130"
-            r="114"
-            fill="rgba(15, 23, 42, 0.45)"
-            stroke="rgba(255, 255, 255, 0.06)"
-            stroke-width="10"
-          />
-
-          <!-- Тонке пунктирне внутрішнє кільце -->
-          <circle
-            cx="130"
-            cy="130"
-            r="100"
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.04)"
-            stroke-width="1"
-            stroke-dasharray="3 6"
-          />
-
-          <!-- Активна дуга прогресу (r = 114, довжина кола = 2 * PI * 114 ≈ 716.28) -->
-          <circle
-            id="progress-ring-arc"
-            cx="130"
-            cy="130"
-            r="114"
-            fill="none"
-            stroke="url(#progress-grad)"
-            stroke-width="10"
-            stroke-linecap="round"
-            stroke-dasharray="716.28"
-            stroke-dashoffset="0"
-          />
-        </svg>
-
-        <!-- Текстовий блок усередині 260px кільця -->
-        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-5">
-          <!-- Підзаголовок стану -->
-          <span id="state-subtitle" class="text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-300/90 mb-1.5">
-            Очікування
-          </span>
-
-          <!-- Великий моноширинний відлік часу HH:MM:SS -->
-          <div id="countdown-display" class="text-[2.65rem] leading-none font-extrabold tracking-tight text-white tabular-nums">
-            02:00:00
-          </div>
-
-          <!-- Бейдж точного часу завершення -->
-          <div id="finish-badge" class="mt-3 glass-pill px-3 py-1 rounded-full flex items-center gap-1.5 text-xs font-medium text-slate-300">
-            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span id="finish-timestamp-text">Цикл: 2 год</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Головна тактильна пігулка-кнопка під кільцем із Ripple-ефектом -->
-      <div class="w-full max-w-[290px] mt-8 flex flex-col items-center">
-        <button id="main-timer-btn" type="button"
-                class="relative overflow-hidden w-full py-4 px-6 rounded-full font-bold text-[1.05rem] tracking-wide text-white bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-xl shadow-indigo-500/25 active:scale-[0.95] transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer touch-manipulation">
-          <span id="main-btn-icon" class="flex items-center justify-center">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="6 4 20 12 6 20 6 4"></polygon>
-            </svg>
-          </span>
-          <span id="main-btn-label">Старт 2 год</span>
-        </button>
-
-        <!-- Додатковий компактний рядок керування (Зупинити / Лічильник циклів) -->
-        <div class="mt-3.5 flex items-center justify-center gap-3 text-xs text-slate-400 min-h-[24px]">
-          <span id="cycles-badge" class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/80"></span>
-            Сьогодні циклів: <strong id="cycles-count" class="text-slate-200 tabular-nums">0</strong>
-          </span>
-          <span id="stop-divider" class="hidden text-slate-700">•</span>
-          <button id="stop-timer-btn" type="button"
-                  class="hidden text-slate-400 hover:text-rose-400 active:text-rose-400 font-medium transition-colors py-1 px-2 rounded-lg touch-manipulation">
-            Зупинити
-          </button>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- 3. Компактний нижній статус інтеграцій (Apple Shortcuts / Звук) -->
-    <footer class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
-      <div id="footer-shortcut-pill" class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-1.5">
-        <span id="shortcut-indicator-dot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-        <span id="shortcut-indicator-text">iOS Команда: вимк.</span>
-      </div>
-      <button id="quick-sound-pill" type="button"
-              class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-slate-800/80 active:scale-95 transition-all touch-manipulation">
-        <span id="sound-indicator-dot" class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-        <span id="sound-indicator-text">Звук: увімк.</span>
-      </button>
-    </footer>
-
-  </main>
-
-  <!-- 4. Плаваючий Undo Toast (6 секунд) при оновленні таймера, який ішов понад 10 сек -->
-  <div id="undo-toast"
-       class="hidden fixed left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2.5rem)] max-w-sm"
-       style="bottom: calc(var(--safe-bottom) + 14px);">
-    <div class="glass-modal rounded-2xl px-4 py-3 shadow-2xl border border-sky-400/30 flex items-center justify-between gap-3 relative overflow-hidden">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0 animate-ping"></span>
-        <span class="text-sm font-medium text-slate-100 truncate">Таймер оновлено</span>
-      </div>
-      <button id="undo-action-btn" type="button"
-              class="px-3.5 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 text-xs font-bold border border-sky-400/30 active:scale-95 transition-all shrink-0 touch-manipulation">
-        Скасувати
-      </button>
-      <div id="undo-timer-bar" class="absolute bottom-0 left-0 h-[2px] bg-sky-400 w-full"></div>
+    <div class="icon-btns">
+      <button class="icon-btn" id="open-settings-btn" title="Налаштування">⚙️</button>
     </div>
   </div>
 
-  <!-- 5. Модальне вікно Налаштувань (⚙️) -->
-  <div id="settings-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4">
-    <div class="glass-modal w-full max-w-md rounded-3xl p-5 shadow-2xl max-h-[86dvh] overflow-y-auto modal-scroll space-y-4"
-         style="margin-bottom: env(safe-area-inset-bottom, 0px);">
+  <!-- Центральний круговий прогрес -->
+  <div class="timer-wrapper">
+    <svg class="progress-ring" width="266" height="266">
+      <circle class="ring-bg" cx="133" cy="133" r="120"></circle>
+      <circle class="ring-progress" id="ring-progress" cx="133" cy="133" r="120"></circle>
+      <!-- Візуальні поділки кожні 30 хв (12, 3, 6, 9 годин) -->
+      <line x1="253" y1="133" x2="262" y2="133" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
+      <line x1="133" y1="253" x2="133" y2="262" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
+      <line x1="13" y1="133" x2="4" y2="133" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
+      <line x1="133" y1="13" x2="133" y2="4" stroke="rgba(255,255,255,0.28)" stroke-width="2" />
+    </svg>
 
-      <div class="flex items-center justify-between pb-1 border-b border-white/10">
-        <h2 class="text-base font-bold text-white flex items-center gap-2">
-          <span>⚙️</span> Налаштування
-        </h2>
-        <button id="close-settings-btn" type="button" aria-label="Закрити налаштування"
-                class="w-8 h-8 rounded-full bg-slate-800/90 text-slate-400 hover:text-white flex items-center justify-center active:scale-90 transition-transform">
-          ✕
-        </button>
+    <div class="timer-content">
+      <div id="time-display">02:00:00</div>
+      <div id="end-time-label">Натисніть старт</div>
+      <div id="next-checkpoint-label" style="display: none;">Нагадування через 30 хв</div>
+    </div>
+  </div>
+
+  <!-- Кнопки керування -->
+  <div class="controls">
+    <button class="primary-btn" id="main-btn">Старт (2 год)</button>
+    <button class="secondary-btn" id="stop-btn" disabled>Стоп / Скинути</button>
+  </div>
+
+  <!-- Плаваюче сповіщення -->
+  <div class="toast" id="toast">
+    <span id="toast-msg">Таймер оновлено</span>
+    <button id="toast-action-btn" style="display: none;">Скасувати</button>
+  </div>
+
+  <!-- Модальне вікно налаштувань -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Налаштування нагадувань</h3>
+        <button class="icon-btn" id="close-settings-btn">✕</button>
       </div>
 
-      <!-- Блок 1: Хмарна синхронізація (Firebase Realtime Database) -->
-      <div class="p-3.5 rounded-2xl bg-slate-900/75 border border-white/10 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <label for="firebase-url-input" class="text-xs font-bold uppercase tracking-wider text-sky-400">
-            1. Хмара (Firebase RTDB)
-          </label>
-          <span id="firebase-status-badge" class="text-[11px] text-slate-400">Не підключено</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          Синхронізує таймер між Safari та віджетом <b>Scriptable</b> на робочому столі iPhone кожні 5 секунд.
-        </p>
-        <input id="firebase-url-input" type="url" inputmode="url" autocomplete="off" spellcheck="false"
-               placeholder="https://your-app-default-rtdb.firebaseio.com"
-               class="w-full px-3 py-2.5 rounded-xl bg-slate-950/90 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-400" />
-        <div class="flex items-center gap-2">
-          <button id="save-firebase-btn" type="button"
-                  class="flex-1 py-2 px-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs active:scale-95 transition-all">
-            Зберегти
-          </button>
-          <button id="clear-firebase-btn" type="button"
-                  class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs active:scale-95 transition-all">
-            Очистити
-          </button>
-        </div>
-      </div>
-
-      <!-- Блок 2: Системний таймер iOS (Apple Shortcuts Bridge) -->
-      <div class="p-3.5 rounded-2xl bg-slate-900/75 border border-white/10 space-y-2.5">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-indigo-400">
-              2. Системний таймер iOS
-            </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">
-              Запускати команду iPhone при натисканні кнопки
-            </p>
-          </div>
-          <!-- Перемикач Apple Shortcuts -->
-          <button id="shortcut-toggle-btn" type="button" role="switch" aria-checked="false"
-                  class="toggle-track w-12 h-7 rounded-full bg-slate-700 p-1 flex items-center shrink-0 cursor-pointer">
-            <span id="shortcut-toggle-thumb" class="toggle-thumb w-5 h-5 rounded-full bg-white shadow transform translate-x-0"></span>
-          </button>
-        </div>
-
-        <div class="space-y-1">
-          <label for="shortcut-name-input" class="block text-[11px] text-slate-400">Назва швидкої команди (Shortcuts):</label>
-          <input id="shortcut-name-input" type="text" value="Timer2H" placeholder="Timer2H"
-                 class="w-full px-3 py-2 rounded-xl bg-slate-950/90 border border-white/10 text-xs text-slate-100 focus:outline-none focus:border-indigo-400" />
-        </div>
-      </div>
-
-      <!-- Блок 3: Звуковий сигнал у додатку (Web Audio API) -->
-      <div class="p-3.5 rounded-2xl bg-slate-900/75 border border-white/10 flex items-center justify-between gap-3">
+      <div class="setting-row">
         <div>
-          <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">
-            3. Звук дзвіночка в додатку
-          </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">
-            Гармонійний сигнал при досягненні 00:00:00
-          </p>
+          <div class="setting-title">Нагадування кожні 30 хв</div>
+          <div class="setting-desc">Звуковий сигнал + пуш на 30, 60 та 90 хвилині роботи.</div>
         </div>
-        <button id="sound-toggle-btn" type="button" role="switch" aria-checked="true"
-                class="toggle-track w-12 h-7 rounded-full bg-emerald-500 p-1 flex items-center shrink-0 cursor-pointer">
-          <span id="sound-toggle-thumb" class="toggle-thumb w-5 h-5 rounded-full bg-white shadow transform translate-x-5"></span>
-        </button>
+        <input type="checkbox" id="chk-30min" checked>
       </div>
 
-      <!-- Блок 4: Швидкий тестовий режим (10 секунд) -->
-      <div class="pt-1 flex items-center gap-2">
-        <button id="test-10s-btn" type="button"
-                class="w-full py-3 px-4 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-300 font-bold text-xs tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-          <span>⚡ Тест (10 сек)</span>
-        </button>
+      <div class="setting-row">
+        <div>
+          <div class="setting-title">Команда iOS «Timer30m»</div>
+          <div class="setting-desc">Запускає системний 30-хв таймер iPhone (дзвонить навіть на заблокованому екрані).</div>
+        </div>
+        <input type="checkbox" id="chk-ios-shortcut">
       </div>
 
-    </div>
-  </div>
-
-  <!-- 6. Модальне вікно Інструкції (?) — GitHub Pages, iPhone Home Screen, Shortcuts та Scriptable -->
-  <div id="guide-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4">
-    <div class="glass-modal w-full max-w-md rounded-3xl p-5 shadow-2xl max-h-[86dvh] overflow-y-auto modal-scroll space-y-3.5"
-         style="margin-bottom: env(safe-area-inset-bottom, 0px);">
-
-      <div class="flex items-center justify-between pb-1 border-b border-white/10">
-        <h2 class="text-base font-bold text-white">Інструкція для iPhone XS</h2>
-        <button id="close-guide-btn" type="button" aria-label="Закрити інструкцію"
-                class="w-8 h-8 rounded-full bg-slate-800/90 text-slate-400 hover:text-white flex items-center justify-center active:scale-90 transition-transform">
-          ✕
-        </button>
+      <div class="setting-row" style="flex-direction: column; align-items: stretch;">
+        <div>
+          <div class="setting-title">Firebase URL (синхронізація з віджетом)</div>
+          <div class="setting-desc">Необов'язково. Вставте посилання бази даних для синхронізації зі Scriptable.</div>
+        </div>
+        <input type="url" class="input-field" id="firebase-url-input" placeholder="https://your-app.firebaseio.com">
       </div>
 
-      <div class="space-y-2.5 text-xs text-slate-300 leading-relaxed">
-        <!-- Крок 1 -->
-        <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
-          <p class="font-bold text-sky-400 mb-1">1. Публікація на GitHub Pages</p>
-          <p class="text-slate-400">
-            Завантажте цей файл як <code class="text-slate-200">index.html</code> у новий публічний репозиторій на GitHub → перейдіть у <b>Settings → Pages</b>, виберіть гілку <code class="text-slate-200">main</code> і натисніть <b>Save</b>.
-          </p>
-        </div>
-
-        <!-- Крок 2 -->
-        <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
-          <p class="font-bold text-indigo-400 mb-1">2. Додавання на робочий стіл iPhone (Safari)</p>
-          <p class="text-slate-400">
-            Відкрийте сайт у <b>Safari</b> → натисніть <b>«Поділитися»</b> (квадрат зі стрілкою вгору) → <b>«На початковий екран»</b>. Додаток відкриватиметься на весь екран iPhone XS без рамок браузера.
-          </p>
-        </div>
-
-        <!-- Крок 3 -->
-        <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10">
-          <p class="font-bold text-amber-400 mb-1">3. Гарантований будильник через «Команди» (Shortcuts)</p>
-          <p class="text-slate-400">
-            Відкрийте стандартний додаток <b>«Команди»</b> → створіть команду з назвою <code class="text-slate-200">Timer2H</code> та додайте одну дію: <b>«Запустити таймер» на 2 години</b>. Увімкніть перемикач у налаштуваннях (⚙️) сайту — тепер системний годинник iPhone спрацює, навіть якщо Safari закрито.
-          </p>
-        </div>
-
-        <!-- Крок 4: Готовий код для iOS Scriptable Widget -->
-        <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10 space-y-2">
-          <div class="flex items-center justify-between gap-2">
-            <p class="font-bold text-emerald-400">4. Віджет iOS через Scriptable (синхронний)</p>
-            <button id="copy-scriptable-btn" type="button"
-                    class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 text-emerald-300 font-bold text-[11px] active:scale-95 transition-all">
-              Копіювати код
-            </button>
-          </div>
-          <p class="text-slate-400">
-            Встановіть безкоштовний <b>Scriptable</b> з App Store, створіть скрипт із цим кодом (підставивши ваш URL Firebase із налаштувань ⚙️) та додайте віджет Scriptable на екран iPhone:
-          </p>
-          <pre id="scriptable-code-preview" class="p-2.5 rounded-xl bg-slate-950/90 border border-white/5 text-[10px] text-slate-300 overflow-x-auto leading-normal"></pre>
-        </div>
-      </div>
-
-      <button id="close-guide-bottom-btn" type="button"
-              class="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-colors">
-        Закрити інструкцію
-      </button>
+      <button class="test-btn" id="test-chime-btn">🔔 Перевірити звук 30-хв нагадування</button>
     </div>
   </div>
 
   <script>
-    /**
-     * Таймер 2 години — iPhone XS Safari PWA + Firebase RTDB Sync + Apple Shortcuts Bridge
-     */
-    (function () {
-      'use strict';
-
-      // --- КОНСТАНТИ ---
-      const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 години (7 200 000 мс)
-      const TEST_DURATION_MS = 10 * 1000;             // Тестовий режим: 10 секунд
-      const WARNING_THRESHOLD_MS = 15 * 60 * 1000;    // Поріг попередження: 15 хвилин
-      const UNDO_ELAPSED_THRESHOLD_MS = 10 * 1000;    // Показувати Undo, якщо пройшло > 10 сек
-      const UNDO_TOAST_DURATION_MS = 6000;            // Тривалість показу Undo Toast (6 сек)
-      const CLOUD_POLL_INTERVAL_MS = 5000;            // Інтервал опитування Firebase RTDB (5 сек)
-      const RING_RADIUS = 114;
-      const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 716.283
-
-      const STORAGE_KEYS = {
-        END_TIME: 'xs_timer2h_end_time',
-        DURATION_MS: 'xs_timer2h_duration_ms',
-        UPDATED_AT: 'xs_timer2h_updated_at',
-        NOTIFIED: 'xs_timer2h_notified',
-        FIREBASE_URL: 'xs_timer2h_firebase_url',
-        SHORTCUT_ENABLED: 'xs_timer2h_shortcut_enabled',
-        SHORTCUT_NAME: 'xs_timer2h_shortcut_name',
-        SOUND_ENABLED: 'xs_timer2h_sound_enabled',
-        CYCLES_TODAY: 'xs_timer2h_cycles_today'
-      };
-
-      // --- DOM-ПОСИЛАННЯ ---
-      const ambientOrbPrimary = document.getElementById('ambient-orb-primary');
-      const ambientOrbSecondary = document.getElementById('ambient-orb-secondary');
-      const progressRingArc = document.getElementById('progress-ring-arc');
-      const ringStop1 = document.getElementById('ring-stop-1');
-      const ringStop2 = document.getElementById('ring-stop-2');
-
-      const syncStatusPill = document.getElementById('sync-status-pill');
-      const syncDot = document.getElementById('sync-dot');
-      const syncLabel = document.getElementById('sync-label');
-
-      const stateSubtitle = document.getElementById('state-subtitle');
-      const countdownDisplay = document.getElementById('countdown-display');
-      const finishTimestampText = document.getElementById('finish-timestamp-text');
-
-      const mainTimerBtn = document.getElementById('main-timer-btn');
-      const mainBtnIcon = document.getElementById('main-btn-icon');
-      const mainBtnLabel = document.getElementById('main-btn-label');
-      const stopTimerBtn = document.getElementById('stop-timer-btn');
-      const stopDivider = document.getElementById('stop-divider');
-      const cyclesCountEl = document.getElementById('cycles-count');
-
-      const shortcutIndicatorDot = document.getElementById('shortcut-indicator-dot');
-      const shortcutIndicatorText = document.getElementById('shortcut-indicator-text');
-      const quickSoundPill = document.getElementById('quick-sound-pill');
-      const soundIndicatorDot = document.getElementById('sound-indicator-dot');
-      const soundIndicatorText = document.getElementById('sound-indicator-text');
-
-      // Undo Toast
-      const undoToast = document.getElementById('undo-toast');
-      const undoActionBtn = document.getElementById('undo-action-btn');
-      const undoTimerBar = document.getElementById('undo-timer-bar');
-
-      // Settings Modal
-      const settingsModal = document.getElementById('settings-modal');
-      const openSettingsBtn = document.getElementById('open-settings-btn');
-      const closeSettingsBtn = document.getElementById('close-settings-btn');
-      const firebaseUrlInput = document.getElementById('firebase-url-input');
-      const firebaseStatusBadge = document.getElementById('firebase-status-badge');
-      const saveFirebaseBtn = document.getElementById('save-firebase-btn');
-      const clearFirebaseBtn = document.getElementById('clear-firebase-btn');
-      const shortcutToggleBtn = document.getElementById('shortcut-toggle-btn');
-      const shortcutToggleThumb = document.getElementById('shortcut-toggle-thumb');
-      const shortcutNameInput = document.getElementById('shortcut-name-input');
-      const soundToggleBtn = document.getElementById('sound-toggle-btn');
-      const soundToggleThumb = document.getElementById('sound-toggle-thumb');
-      const test10sBtn = document.getElementById('test-10s-btn');
-
-      // Guide Modal
-      const guideModal = document.getElementById('guide-modal');
-      const openGuideBtn = document.getElementById('open-guide-btn');
-      const closeGuideBtn = document.getElementById('close-guide-btn');
-      const closeGuideBottomBtn = document.getElementById('close-guide-bottom-btn');
-      const copyScriptableBtn = document.getElementById('copy-scriptable-btn');
-      const scriptableCodePreview = document.getElementById('scriptable-code-preview');
-
-      // --- СТАН ДОДАТКУ ---
-      let endTime = loadNumber(STORAGE_KEYS.END_TIME, null);
-      let activeDurationMs = loadNumber(STORAGE_KEYS.DURATION_MS, DEFAULT_DURATION_MS);
-      let updatedAt = loadNumber(STORAGE_KEYS.UPDATED_AT, 0);
-      let notified = localStorage.getItem(STORAGE_KEYS.NOTIFIED) === 'true';
-
-      let firebaseBaseUrl = normalizeFirebaseUrl(localStorage.getItem(STORAGE_KEYS.FIREBASE_URL) || '');
-      let shortcutEnabled = localStorage.getItem(STORAGE_KEYS.SHORTCUT_ENABLED) === 'true';
-      let shortcutName = localStorage.getItem(STORAGE_KEYS.SHORTCUT_NAME) || 'Timer2H';
-      let soundEnabled = localStorage.getItem(STORAGE_KEYS.SOUND_ENABLED) !== 'false';
-      let cyclesToday = loadCyclesToday();
-
-      let currentVisualMode = ''; // 'idle' | 'running' | 'warning' | 'finished'
-      let undoSnapshot = null;    // { prevEndTime, prevDurationMs, prevUpdatedAt, prevNotified }
-      let undoTimerHandle = null;
-      let audioContext = null;
-      let isCloudFetching = false;
-
-      // --- ІНІЦІАЛІЗАЦІЯ TELEGRAM WEBAPP (ЯКЩО ВІДКРИТО В ТГ) ---
-      const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (tg) {
-        try {
-          tg.ready();
-          tg.expand();
-          if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#090d16');
-          if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#090d16');
-        } catch (e) {}
-      }
-
-      // --- ДОПОМІЖНІ ФУНКЦІЇ ЗБЕРЕЖЕННЯ ТА ФОРМАТУВАННЯ ---
-      function loadNumber(key, fallback) {
-        const raw = localStorage.getItem(key);
-        if (raw === null || raw === '') return fallback;
-        const num = Number(raw);
-        return Number.isFinite(num) && num > 0 ? num : fallback;
-      }
-
-      function getTodayKey() {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      }
-
-      function loadCyclesToday() {
-        const today = getTodayKey();
-        try {
-          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.CYCLES_TODAY) || 'null');
-          if (parsed && parsed.date === today && typeof parsed.count === 'number') {
-            return parsed;
-          }
-        } catch (e) {}
-        return { date: today, count: 0 };
-      }
-
-      function incrementCyclesToday() {
-        const today = getTodayKey();
-        if (cyclesToday.date !== today) {
-          cyclesToday = { date: today, count: 1 };
-        } else {
-          cyclesToday.count += 1;
-        }
-        localStorage.setItem(STORAGE_KEYS.CYCLES_TODAY, JSON.stringify(cyclesToday));
-        cyclesCountEl.textContent = String(cyclesToday.count);
-      }
-
-      function persistTimerState(newEndTime, newDurationMs, newUpdatedAt, newNotified) {
-        endTime = newEndTime;
-        activeDurationMs = newDurationMs;
-        updatedAt = newUpdatedAt;
-        notified = newNotified;
-
-        if (endTime === null) {
-          localStorage.removeItem(STORAGE_KEYS.END_TIME);
-        } else {
-          localStorage.setItem(STORAGE_KEYS.END_TIME, String(endTime));
-        }
-        localStorage.setItem(STORAGE_KEYS.DURATION_MS, String(activeDurationMs));
-        localStorage.setItem(STORAGE_KEYS.UPDATED_AT, String(updatedAt));
-        localStorage.setItem(STORAGE_KEYS.NOTIFIED, notified ? 'true' : 'false');
-      }
-
-      function formatHHMMSS(ms) {
-        const safeMs = Math.max(0, ms);
-        const totalSec = Math.ceil(safeMs / 1000);
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor((totalSec % 3600) / 60);
-        const s = totalSec % 60;
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-      }
-
-      function formatClockHHMM(timestamp) {
-        const d = new Date(timestamp);
-        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-      }
-
-      // --- FIREBASE REALTIME DATABASE СИНХРОНІЗАЦІЯ ---
-      function normalizeFirebaseUrl(rawUrl) {
-        if (!rawUrl) return '';
-        let cleaned = rawUrl.trim();
-        // Видаляємо завершальний /timer.json або слеш, якщо користувач вставив повний шлях
-        cleaned = cleaned.replace(/\/timer\.json\/?$/i, '');
-        cleaned = cleaned.replace(/\/+$/, '');
-        if (cleaned && !/^https?:\/\//i.test(cleaned)) {
-          cleaned = 'https://' + cleaned;
-        }
-        return cleaned;
-      }
-
-      function setSyncPillState(mode, customText) {
-        if (mode === 'local') {
-          syncDot.className = 'w-2 h-2 rounded-full bg-indigo-400';
-          syncLabel.textContent = customText || 'Локально';
-        } else if (mode === 'cloud-ok') {
-          syncDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-          syncLabel.textContent = customText || 'Хмара активна';
-        } else if (mode === 'cloud-syncing') {
-          syncDot.className = 'w-2 h-2 rounded-full bg-sky-400 animate-ping';
-          syncLabel.textContent = customText || 'Синхронізація...';
-        } else if (mode === 'cloud-error') {
-          syncDot.className = 'w-2 h-2 rounded-full bg-amber-400';
-          syncLabel.textContent = customText || 'Помилка мережі';
-        }
-      }
-
-      /**
-       * Відправляє актуальний endTime у Firebase RTDB (<url>/timer.json)
-       */
-      async function pushTimerToCloud(targetEndTime, targetUpdatedAt) {
-        if (!firebaseBaseUrl) {
-          setSyncPillState('local');
-          return;
-        }
-
-        const endpoint = `${firebaseBaseUrl}/timer.json`;
-        setSyncPillState('cloud-syncing');
-
-        try {
-          const response = await fetch(endpoint, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            keepalive: true, // Гарантує завершення запиту навіть при переході в Apple Shortcuts
-            body: JSON.stringify({
-              endTime: targetEndTime,
-              updatedAt: targetUpdatedAt
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          setSyncPillState('cloud-ok');
-        } catch (err) {
-          console.warn('Firebase PUT error:', err);
-          setSyncPillState('cloud-error');
-        }
-      }
-
-      /**
-       * Отримує стан із Firebase RTDB (<url>/timer.json), щоб синхронізуватися з віджетом Scriptable
-       */
-      async function pullTimerFromCloud() {
-        if (!firebaseBaseUrl || isCloudFetching) return;
-        isCloudFetching = true;
-        const endpoint = `${firebaseBaseUrl}/timer.json`;
-
-        try {
-          const response = await fetch(endpoint, {
-            method: 'GET',
-            cache: 'no-store'
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
-          const data = await response.json();
-          setSyncPillState('cloud-ok');
-
-          if (data && typeof data === 'object') {
-            const remoteEndTime = data.endTime === null ? null : Number(data.endTime);
-            const remoteUpdatedAt = Number(data.updatedAt) || 0;
-
-            // Якщо в хмарі новіший запис (наприклад, натиснули віджет Scriptable на робочому екрані)
-            if (remoteUpdatedAt > updatedAt) {
-              hideUndoToast();
-              const isRemoteRunning = remoteEndTime !== null && remoteEndTime > Date.now();
-              const inferredDuration = isRemoteRunning
-                ? Math.max(DEFAULT_DURATION_MS, remoteEndTime - remoteUpdatedAt)
-                : DEFAULT_DURATION_MS;
-
-              persistTimerState(
-                Number.isFinite(remoteEndTime) ? remoteEndTime : null,
-                inferredDuration,
-                remoteUpdatedAt,
-                false
-              );
-              renderTick();
-            }
-          }
-        } catch (err) {
-          console.warn('Firebase GET error:', err);
-          setSyncPillState('cloud-error');
-        } finally {
-          isCloudFetching = false;
-        }
-      }
-
-      // --- APPLE SHORTCUTS BRIDGE (СИСТЕМНИЙ ТАЙМЕР IPHONE) ---
-      function triggerAppleShortcutIfEnabled() {
-        if (!shortcutEnabled) return;
-        const cleanName = (shortcutName || 'Timer2H').trim();
-        if (!cleanName) return;
-
-        // Невелика затримка 80мс дозволяє браузеру встигнути відправити fetch(keepalive) у Firebase
-        setTimeout(() => {
-          window.location.href = `shortcuts://run-shortcut?name=${encodeURIComponent(cleanName)}`;
-        }, 80);
-      }
-
-      // --- WEB AUDIO API СИНТЕЗАТОР ГАРМОНІЙНОГО ДЗВІНОЧКА ---
-      function ensureAudioUnlocked() {
-        try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          if (!audioContext) {
-            audioContext = new AudioCtx();
-          }
-          if (audioContext.state === 'suspended') {
-            audioContext.resume();
-          }
-        } catch (e) {}
-      }
-
-      function playBellChime(force = false) {
-        if (!soundEnabled && !force) return;
-        try {
-          ensureAudioUnlocked();
-          if (!audioContext) return;
-
-          const now = audioContext.currentTime;
-          // Гармонійний акорд кришталевого дзвіночка (C5, E5, G5, B5, D6)
-          const partials = [
-            { freq: 523.25, delay: 0.00, dur: 1.4, vol: 0.15 },
-            { freq: 659.25, delay: 0.11, dur: 1.5, vol: 0.13 },
-            { freq: 783.99, delay: 0.22, dur: 1.6, vol: 0.12 },
-            { freq: 987.77, delay: 0.34, dur: 1.8, vol: 0.10 },
-            { freq: 1174.66, delay: 0.46, dur: 2.0, vol: 0.08 }
-          ];
-
-          partials.forEach((p) => {
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(p.freq, now + p.delay);
-
-            gain.gain.setValueAtTime(0.0001, now + p.delay);
-            gain.gain.linearRampToValueAtTime(p.vol, now + p.delay + 0.025);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + p.delay + p.dur);
-
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-
-            osc.start(now + p.delay);
-            osc.stop(now + p.delay + p.dur + 0.05);
-          });
-        } catch (e) {}
-      }
-
-      // --- ВІЗУАЛЬНІ СТАНИ ТА ДИНАМІЧНІ КОЛЬОРИ ОРБІТ ---
-      function applyStateTheme(mode) {
-        if (currentVisualMode === mode) return;
-        currentVisualMode = mode;
-
-        ambientOrbPrimary.classList.remove('ambient-finished-pulse');
-
-        if (mode === 'idle') {
-          // Індиго (#6366f1)
-          ambientOrbPrimary.style.background = 'radial-gradient(circle, rgba(99, 102, 241, 0.30) 0%, rgba(99, 102, 241, 0.06) 52%, transparent 74%)';
-          ambientOrbSecondary.style.background = 'radial-gradient(circle, rgba(79, 70, 229, 0.18) 0%, transparent 70%)';
-          ringStop1.setAttribute('stop-color', '#6366f1');
-          ringStop2.setAttribute('stop-color', '#818cf8');
-
-          stateSubtitle.className = 'text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-300/90 mb-1.5';
-          stateSubtitle.textContent = 'Очікування';
-
-          mainTimerBtn.className = 'relative overflow-hidden w-full py-4 px-6 rounded-full font-bold text-[1.05rem] tracking-wide text-white bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-xl shadow-indigo-500/25 active:scale-[0.95] transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer touch-manipulation';
-          mainBtnIcon.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>';
-          mainBtnLabel.textContent = 'Старт 2 год';
-
-          stopTimerBtn.classList.add('hidden');
-          stopDivider.classList.add('hidden');
-        } else if (mode === 'running') {
-          // Електричний ціан / синій (#0ea5e9)
-          ambientOrbPrimary.style.background = 'radial-gradient(circle, rgba(14, 165, 233, 0.32) 0%, rgba(37, 99, 235, 0.08) 52%, transparent 74%)';
-          ambientOrbSecondary.style.background = 'radial-gradient(circle, rgba(6, 182, 212, 0.20) 0%, transparent 70%)';
-          ringStop1.setAttribute('stop-color', '#0ea5e9');
-          ringStop2.setAttribute('stop-color', '#38bdf8');
-
-          stateSubtitle.className = 'text-[11px] font-bold uppercase tracking-[0.14em] text-sky-300 mb-1.5';
-          stateSubtitle.textContent = activeDurationMs === TEST_DURATION_MS ? 'Тест (10 сек)' : 'Відлік іде';
-
-          mainTimerBtn.className = 'relative overflow-hidden w-full py-4 px-6 rounded-full font-bold text-[1.05rem] tracking-wide text-white bg-gradient-to-r from-sky-500 to-blue-600 shadow-xl shadow-sky-500/25 active:scale-[0.95] transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer touch-manipulation';
-          mainBtnIcon.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
-          mainBtnLabel.textContent = 'Оновити (2 год)';
-
-          stopTimerBtn.classList.remove('hidden');
-          stopDivider.classList.remove('hidden');
-        } else if (mode === 'warning') {
-          // Теплий бурштиновий (#f59e0b) коли залишилось менше 15 хвилин
-          ambientOrbPrimary.style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.34) 0%, rgba(234, 88, 12, 0.08) 52%, transparent 74%)';
-          ambientOrbSecondary.style.background = 'radial-gradient(circle, rgba(217, 119, 6, 0.22) 0%, transparent 70%)';
-          ringStop1.setAttribute('stop-color', '#f59e0b');
-          ringStop2.setAttribute('stop-color', '#fbbf24');
-
-          stateSubtitle.className = 'text-[11px] font-bold uppercase tracking-[0.14em] text-amber-300 mb-1.5';
-          stateSubtitle.textContent = 'Менше 15 хв';
-
-          mainTimerBtn.className = 'relative overflow-hidden w-full py-4 px-6 rounded-full font-bold text-[1.05rem] tracking-wide text-white bg-gradient-to-r from-amber-500 to-orange-600 shadow-xl shadow-amber-500/25 active:scale-[0.95] transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer touch-manipulation';
-          mainBtnIcon.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
-          mainBtnLabel.textContent = 'Оновити (2 год)';
-
-          stopTimerBtn.classList.remove('hidden');
-          stopDivider.classList.remove('hidden');
-        } else if (mode === 'finished') {
-          // Пульсація Смарагд / Троянда (#10b981 / #f43f5e)
-          ambientOrbPrimary.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(244, 63, 94, 0.18) 52%, transparent 75%)';
-          ambientOrbSecondary.style.background = 'radial-gradient(circle, rgba(244, 63, 94, 0.24) 0%, transparent 70%)';
-          ambientOrbPrimary.classList.add('ambient-finished-pulse');
-
-          ringStop1.setAttribute('stop-color', '#10b981');
-          ringStop2.setAttribute('stop-color', '#f43f5e');
-
-          stateSubtitle.className = 'text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-300 mb-1.5';
-          stateSubtitle.textContent = 'Час вийшов!';
-
-          mainTimerBtn.className = 'relative overflow-hidden w-full py-4 px-6 rounded-full font-bold text-[1.05rem] tracking-wide text-white bg-gradient-to-r from-emerald-500 to-teal-600 shadow-xl shadow-emerald-500/30 active:scale-[0.95] transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer touch-manipulation';
-          mainBtnIcon.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>';
-          mainBtnLabel.textContent = 'Старт 2 год';
-
-          stopTimerBtn.classList.add('hidden');
-          stopDivider.classList.add('hidden');
-        }
-      }
-
-      // --- RIPPLE-ЕФЕКТ КНОПКИ ---
-      function spawnButtonRipple(event) {
-        const rect = mainTimerBtn.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-        const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-        const x = (clientX || rect.left + rect.width / 2) - rect.left - size / 2;
-        const y = (clientY || rect.top + rect.height / 2) - rect.top - size / 2;
-
-        const wave = document.createElement('span');
-        wave.className = 'ripple-wave';
-        wave.style.width = `${size}px`;
-        wave.style.height = `${size}px`;
-        wave.style.left = `${x}px`;
-        wave.style.top = `${y}px`;
-        mainTimerBtn.appendChild(wave);
-
-        setTimeout(() => wave.remove(), 600);
-      }
-
-      // --- UNDO TOAST (6 СЕКУНД) ---
-      function showUndoToast(snapshot) {
-        undoSnapshot = snapshot;
-        if (undoTimerHandle) clearTimeout(undoTimerHandle);
-
-        undoToast.classList.remove('hidden');
-        undoToast.classList.remove('toast-visible');
-        void undoToast.offsetWidth;
-        undoToast.classList.add('toast-visible');
-
-        undoTimerBar.style.transition = 'none';
-        undoTimerBar.style.width = '100%';
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            undoTimerBar.style.transition = `width ${UNDO_TOAST_DURATION_MS}ms linear`;
-            undoTimerBar.style.width = '0%';
-          });
+    const TOTAL_MS = 2 * 60 * 60 * 1000; // 2 години (7200000 мс)
+    const INTERVAL_MS = 30 * 60 * 1000;   // 30 хвилин (1800000 мс)
+
+    const ring = document.getElementById('ring-progress');
+    const radius = 120;
+    const circumference = 2 * Math.PI * radius;
+    ring.style.strokeDasharray = `${circumference} ${circumference}`;
+    ring.style.strokeDashoffset = 0;
+
+    const timeDisplay = document.getElementById('time-display');
+    const endTimeLabel = document.getElementById('end-time-label');
+    const nextCheckpointLabel = document.getElementById('next-checkpoint-label');
+    const statusDot = document.getElementById('status-dot');
+    const statusBadgeText = document.getElementById('status-badge-text');
+    const ambientGlow = document.getElementById('ambient-glow');
+    const mainBtn = document.getElementById('main-btn');
+    const stopBtn = document.getElementById('stop-btn');
+
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toast-msg');
+    const toastActionBtn = document.getElementById('toast-action-btn');
+
+    // Налаштування
+    const chk30Min = document.getElementById('chk-30min');
+    const chkIosShortcut = document.getElementById('chk-ios-shortcut');
+    const firebaseInput = document.getElementById('firebase-url-input');
+
+    let previousEndTime = null;
+    let toastTimeout = null;
+
+    // Завантаження збережених налаштувань
+    chk30Min.checked = localStorage.getItem('remind30m') !== 'false';
+    chkIosShortcut.checked = localStorage.getItem('useIosShortcut') === 'true';
+    firebaseInput.value = localStorage.getItem('firebaseUrl') || '';
+
+    chk30Min.addEventListener('change', () => {
+      localStorage.setItem('remind30m', chk30Min.checked);
+      updateUI();
+    });
+    chkIosShortcut.addEventListener('change', () => {
+      localStorage.setItem('useIosShortcut', chkIosShortcut.checked);
+    });
+    firebaseInput.addEventListener('change', () => {
+      localStorage.setItem('firebaseUrl', firebaseInput.value.trim().replace(/\/$/, ''));
+    });
+
+    // Модалка налаштувань
+    const settingsModal = document.getElementById('settings-modal');
+    document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('open');
+    document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('open');
+    settingsModal.onclick = (e) => { if (e.target === settingsModal) settingsModal.classList.remove('open'); };
+
+    // Звуковий синтезатор (Web Audio API)
+    function playChime(type = 'interval') {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = ctx.currentTime;
+        // Для 30-хв нагадування — подвійний м'який сигнал; для фінішу — потрійний акорд
+        const notes = type === 'finish' ? [523.25, 659.25, 783.99, 1046.5] : [587.33, 880];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+          gain.gain.setValueAtTime(0.001, now + idx * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.22, now + idx * 0.16 + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.16 + 0.55);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.16);
+          osc.stop(now + idx * 0.16 + 0.6);
         });
+      } catch (e) {}
+    }
 
-        undoTimerHandle = setTimeout(() => {
-          hideUndoToast();
-        }, UNDO_TOAST_DURATION_MS);
-      }
+    document.getElementById('test-chime-btn').onclick = () => {
+      playChime('interval');
+      showToast('🔔 Тест 30-хвилинного сигналу');
+    };
 
-      function hideUndoToast() {
-        undoToast.classList.add('hidden');
-        undoSnapshot = null;
-        if (undoTimerHandle) {
-          clearTimeout(undoTimerHandle);
-          undoTimerHandle = null;
-        }
-      }
-
-      function handleUndoClick() {
-        if (!undoSnapshot) return;
-        const now = Date.now();
-        persistTimerState(
-          undoSnapshot.prevEndTime,
-          undoSnapshot.prevDurationMs,
-          now,
-          undoSnapshot.prevNotified
-        );
-        hideUndoToast();
-        renderTick();
-        pushTimerToCloud(endTime, now);
-      }
-
-      // --- ОБРОБНИКИ ДІЙ ТАЙМЕРА ---
-      function startOrResetTimer(durationMs, isTestMode = false) {
-        ensureAudioUnlocked();
-        requestWebNotificationPermission();
-
-        const now = Date.now();
-        const isAlreadyRunning = endTime !== null && endTime > now;
-
-        // Якщо таймер вже працював понад 10 секунд, зберігаємо знімок для Undo Toast
-        if (!isTestMode && isAlreadyRunning) {
-          const elapsed = activeDurationMs - (endTime - now);
-          if (elapsed > UNDO_ELAPSED_THRESHOLD_MS) {
-            showUndoToast({
-              prevEndTime: endTime,
-              prevDurationMs: activeDurationMs,
-              prevUpdatedAt: updatedAt,
-              prevNotified: notified
-            });
-          } else {
-            hideUndoToast();
-          }
-        } else {
-          hideUndoToast();
-        }
-
-        const newEndTime = now + durationMs;
-        persistTimerState(newEndTime, durationMs, now, false);
-        renderTick();
-
-        // Синхронізація з Firebase RTDB
-        pushTimerToCloud(newEndTime, now);
-
-        // Запуск системної команди iOS (Apple Shortcuts), якщо увімкнено і це не 10-сек тест
-        if (!isTestMode) {
-          triggerAppleShortcutIfEnabled();
-        }
-      }
-
-      function handleStopTimer() {
-        const now = Date.now();
-        hideUndoToast();
-        persistTimerState(null, DEFAULT_DURATION_MS, now, false);
-        renderTick();
-        pushTimerToCloud(null, now);
-      }
-
-      function requestWebNotificationPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-          Notification.requestPermission().catch(() => {});
-        }
-      }
-
-      function triggerInAppAndWebNotification() {
-        playBellChime(false);
-        if (navigator.vibrate) {
-          try { navigator.vibrate([200, 100, 200]); } catch (e) {}
-        }
-        if ('Notification' in window && Notification.permission === 'granted') {
-          try {
-            new Notification('⏰ 2 години минуло!', {
-              body: 'Час вийшов. Натисніть, щоб оновити таймер.',
-              tag: 'timer-2h-alert'
-            });
-          } catch (e) {}
-        }
-      }
-
-      // --- ГОЛОВНИЙ ЦИКЛ ОНОВЛЕННЯ ЕКРАНА ---
-      function renderTick() {
-        const today = getTodayKey();
-        if (cyclesToday.date !== today) {
-          cyclesToday = { date: today, count: 0 };
-          cyclesCountEl.textContent = '0';
-        }
-
-        // 1. Очікування (Idle)
-        if (endTime === null) {
-          applyStateTheme('idle');
-          countdownDisplay.textContent = '02:00:00';
-          finishTimestampText.textContent = 'Цикл: 2 год';
-          progressRingArc.style.strokeDashoffset = '0';
-          return;
-        }
-
-        const now = Date.now();
-        const remaining = endTime - now;
-
-        // 2. Активний відлік (Running або Warning < 15 хв)
-        if (remaining > 0) {
-          const isWarning = activeDurationMs > WARNING_THRESHOLD_MS && remaining <= WARNING_THRESHOLD_MS;
-          applyStateTheme(isWarning ? 'warning' : 'running');
-
-          countdownDisplay.textContent = formatHHMMSS(remaining);
-          finishTimestampText.textContent = `Фініш о ${formatClockHHMM(endTime)}`;
-
-          const ratio = Math.min(1, Math.max(0, remaining / activeDurationMs));
-          const offset = RING_CIRCUMFERENCE * (1 - ratio);
-          progressRingArc.style.strokeDashoffset = offset.toFixed(2);
-          return;
-        }
-
-        // 3. Завершено (Finished)
-        applyStateTheme('finished');
-        countdownDisplay.textContent = '00:00:00';
-        finishTimestampText.textContent = `Завершено о ${formatClockHHMM(endTime)}`;
-        progressRingArc.style.strokeDashoffset = RING_CIRCUMFERENCE.toFixed(2);
-
-        if (!notified) {
-          persistTimerState(endTime, activeDurationMs, updatedAt, true);
-          if (activeDurationMs >= DEFAULT_DURATION_MS) {
-            incrementCyclesToday();
-          }
-          triggerInAppAndWebNotification();
-        }
-      }
-
-      // --- UI НАЛАШТУВАНЬ ТА ІНСТРУКЦІЇ ---
-      function syncSettingsUI() {
-        cyclesCountEl.textContent = String(cyclesToday.count);
-        firebaseUrlInput.value = firebaseBaseUrl;
-        shortcutNameInput.value = shortcutName;
-
-        if (firebaseBaseUrl) {
-          firebaseStatusBadge.textContent = 'Налаштовано';
-          firebaseStatusBadge.className = 'text-[11px] text-emerald-400 font-semibold';
-          setSyncPillState('cloud-ok');
-        } else {
-          firebaseStatusBadge.textContent = 'Не підключено';
-          firebaseStatusBadge.className = 'text-[11px] text-slate-400';
-          setSyncPillState('local');
-        }
-
-        // Перемикач Apple Shortcuts
-        shortcutToggleBtn.setAttribute('aria-checked', shortcutEnabled ? 'true' : 'false');
-        shortcutToggleBtn.className = `toggle-track w-12 h-7 rounded-full p-1 flex items-center shrink-0 cursor-pointer ${shortcutEnabled ? 'bg-indigo-500' : 'bg-slate-700'}`;
-        shortcutToggleThumb.style.transform = shortcutEnabled ? 'translateX(20px)' : 'translateX(0px)';
-
-        shortcutIndicatorDot.className = `w-1.5 h-1.5 rounded-full ${shortcutEnabled ? 'bg-indigo-400' : 'bg-slate-500'}`;
-        shortcutIndicatorText.textContent = shortcutEnabled ? `iOS Команда: ${shortcutName}` : 'iOS Команда: вимк.';
-
-        // Перемикач звуку
-        soundToggleBtn.setAttribute('aria-checked', soundEnabled ? 'true' : 'false');
-        soundToggleBtn.className = `toggle-track w-12 h-7 rounded-full p-1 flex items-center shrink-0 cursor-pointer ${soundEnabled ? 'bg-emerald-500' : 'bg-slate-700'}`;
-        soundToggleThumb.style.transform = soundEnabled ? 'translateX(20px)' : 'translateX(0px)';
-
-        soundIndicatorDot.className = `w-1.5 h-1.5 rounded-full ${soundEnabled ? 'bg-sky-400' : 'bg-slate-500'}`;
-        soundIndicatorText.textContent = soundEnabled ? 'Звук: увімк.' : 'Звук: вимк.';
-
-        renderScriptableSnippet();
-      }
-
-      /**
-       * Генерує готовий код для віджета iOS Scriptable із підставленим URL Firebase користувача
-       */
-      function getScriptableWidgetCode() {
-        const dbUrl = firebaseBaseUrl || 'https://your-app-default-rtdb.firebaseio.com';
-        return `// Віджет iOS Scriptable для синхронізації таймера 2 год
-const DB_URL = "${dbUrl}/timer.json";
-const DURATION_MS = 2 * 60 * 60 * 1000;
-
-async function run() {
-  // Якщо віджет натиснули на робочому столі — оновлюємо таймер у хмарі
-  if (config.runsInApp || args.widgetParameter === "reset") {
-    const now = Date.now();
-    const req = new Request(DB_URL);
-    req.method = "PUT";
-    req.headers = { "Content-Type": "application/json" };
-    req.body = JSON.stringify({ endTime: now + DURATION_MS, updatedAt: now });
-    await req.loadJSON();
-  }
-
-  let data = null;
-  try {
-    const req = new Request(DB_URL);
-    data = await req.loadJSON();
-  } catch (e) {}
-
-  const w = new ListWidget();
-  w.backgroundColor = new Color("#090d16");
-  w.url = URLScheme.forRunningScript(); // Тап по віджету перезапускає відлік
-
-  const title = w.addText("⏱ ТАЙМЕР 2 ГОД");
-  title.font = Font.boldSystemFont(11);
-  title.textColor = new Color("#38bdf8");
-  w.addSpacer(6);
-
-  const endTime = data && data.endTime ? Number(data.endTime) : null;
-  const rem = endTime ? endTime - Date.now() : 0;
-
-  if (rem > 0) {
-    const h = Math.floor(rem / 3600000);
-    const m = Math.floor((rem % 3600000) / 60000);
-    const timeText = w.addText(\`\${h}г \${String(m).padStart(2, "0")}хв\`);
-    timeText.font = Font.heavySystemFont(24);
-    timeText.textColor = Color.white();
-
-    const fin = new Date(endTime);
-    const sub = w.addText(\`Фініш о \${String(fin.getHours()).padStart(2,"0")}:\${String(fin.getMinutes()).padStart(2,"0")}\`);
-    sub.font = Font.mediumSystemFont(11);
-    sub.textColor = new Color("#94a3b8");
-  } else {
-    const doneText = w.addText(endTime ? "Час вийшов!" : "Очікування");
-    doneText.font = Font.boldSystemFont(18);
-    doneText.textColor = new Color(endTime ? "#10b981" : "#818cf8");
-  }
-
-  w.addSpacer(6);
-  const hint = w.addText("Тап → Оновити 2 год");
-  hint.font = Font.mediumSystemFont(10);
-  hint.textColor = new Color("#64748b");
-
-  if (config.runsInWidget) {
-    Script.setWidget(w);
-  } else {
-    await w.presentSmall();
-  }
-  Script.complete();
-}
-await run();`;
-      }
-
-      function renderScriptableSnippet() {
-        scriptableCodePreview.textContent = getScriptableWidgetCode();
-      }
-
-      function copyTextFallback(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
+    function sendNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
         try {
-          document.execCommand('copy');
+          new Notification(title, { body });
         } catch (e) {}
-        document.body.removeChild(textarea);
+      }
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+
+    function showToast(text, withUndo = false) {
+      toastMsg.textContent = text;
+      toastActionBtn.style.display = withUndo ? 'inline-block' : 'none';
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 5500);
+    }
+
+    toastActionBtn.onclick = () => {
+      if (previousEndTime) {
+        localStorage.setItem('timerEndTime', previousEndTime);
+        syncCloud(previousEndTime);
+        previousEndTime = null;
+        toast.classList.remove('show');
+        updateUI();
+      }
+    };
+
+    // Синхронізація з Firebase (якщо вказано URL)
+    async function syncCloud(endTimeVal) {
+      const baseUrl = localStorage.getItem('firebaseUrl');
+      if (!baseUrl) return;
+      try {
+        await fetch(`${baseUrl}/timer.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endTime: endTimeVal, updatedAt: Date.now() })
+        });
+      } catch (e) {}
+    }
+
+    async function pullCloud() {
+      const baseUrl = localStorage.getItem('firebaseUrl');
+      if (!baseUrl) return;
+      try {
+        const res = await fetch(`${baseUrl}/timer.json`);
+        const data = await res.json();
+        if (data && typeof data.endTime !== 'undefined') {
+          const localEnd = Number(localStorage.getItem('timerEndTime')) || 0;
+          if (Math.abs(data.endTime - localEnd) > 2000) {
+            if (data.endTime === 0) {
+              localStorage.removeItem('timerEndTime');
+            } else {
+              localStorage.setItem('timerEndTime', data.endTime);
+            }
+            updateUI();
+          }
+        }
+      } catch (e) {}
+    }
+
+    function formatClock(timestamp) {
+      const d = new Date(timestamp);
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function formatRemaining(ms) {
+      const totalSec = Math.max(0, Math.ceil(ms / 1000));
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function startOrResetTimer() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
       }
 
-      // --- ПІДПИСКА НА ПОДІЇ ---
-      mainTimerBtn.addEventListener('click', (e) => {
-        spawnButtonRipple(e);
-        startOrResetTimer(DEFAULT_DURATION_MS, false);
-      });
+      const currentEnd = Number(localStorage.getItem('timerEndTime'));
+      const now = Date.now();
 
-      stopTimerBtn.addEventListener('click', handleStopTimer);
-      undoActionBtn.addEventListener('click', handleUndoClick);
+      // Зберігаємо попередній стан для Undo, якщо таймер уже йшов > 10 сек
+      if (currentEnd && currentEnd > now && (TOTAL_MS - (currentEnd - now)) > 10000) {
+        previousEndTime = currentEnd;
+        showToast('Таймер оновлено на 2 години', true);
+      } else {
+        previousEndTime = null;
+        showToast('Відлік на 2 години розпочато', false);
+      }
 
-      syncStatusPill.addEventListener('click', () => {
-        if (firebaseBaseUrl) {
-          setSyncPillState('cloud-syncing');
-          pullTimerFromCloud();
-        } else {
-          settingsModal.classList.remove('hidden');
-        }
-      });
+      const newEnd = now + TOTAL_MS;
+      localStorage.setItem('timerEndTime', newEnd);
+      localStorage.setItem('lastPassedStep', '0'); // 0 = старт, 1 = 30хв, 2 = 60хв, 3 = 90хв, 4 = фініш
+      syncCloud(newEnd);
+      updateUI();
 
-      quickSoundPill.addEventListener('click', () => {
-        ensureAudioUnlocked();
-        soundEnabled = !soundEnabled;
-        localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, soundEnabled ? 'true' : 'false');
-        syncSettingsUI();
-        if (soundEnabled) playBellChime(true);
-      });
-
-      // Settings Modal Events
-      openSettingsBtn.addEventListener('click', () => {
-        syncSettingsUI();
-        settingsModal.classList.remove('hidden');
-      });
-      closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-      settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) settingsModal.classList.add('hidden');
-      });
-
-      saveFirebaseBtn.addEventListener('click', () => {
-        firebaseBaseUrl = normalizeFirebaseUrl(firebaseUrlInput.value);
-        localStorage.setItem(STORAGE_KEYS.FIREBASE_URL, firebaseBaseUrl);
-        syncSettingsUI();
-        if (firebaseBaseUrl) {
-          pushTimerToCloud(endTime, updatedAt || Date.now());
-        }
-      });
-
-      clearFirebaseBtn.addEventListener('click', () => {
-        firebaseBaseUrl = '';
-        firebaseUrlInput.value = '';
-        localStorage.removeItem(STORAGE_KEYS.FIREBASE_URL);
-        syncSettingsUI();
-      });
-
-      shortcutToggleBtn.addEventListener('click', () => {
-        shortcutEnabled = !shortcutEnabled;
-        localStorage.setItem(STORAGE_KEYS.SHORTCUT_ENABLED, shortcutEnabled ? 'true' : 'false');
-        syncSettingsUI();
-      });
-
-      shortcutNameInput.addEventListener('input', () => {
-        shortcutName = shortcutNameInput.value.trim() || 'Timer2H';
-        localStorage.setItem(STORAGE_KEYS.SHORTCUT_NAME, shortcutName);
-        if (shortcutEnabled) {
-          shortcutIndicatorText.textContent = `iOS Команда: ${shortcutName}`;
-        }
-      });
-
-      soundToggleBtn.addEventListener('click', () => {
-        ensureAudioUnlocked();
-        soundEnabled = !soundEnabled;
-        localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, soundEnabled ? 'true' : 'false');
-        syncSettingsUI();
-        if (soundEnabled) playBellChime(true);
-      });
-
-      test10sBtn.addEventListener('click', () => {
-        settingsModal.classList.add('hidden');
-        startOrResetTimer(TEST_DURATION_MS, true);
-      });
-
-      // Guide Modal Events
-      openGuideBtn.addEventListener('click', () => {
-        renderScriptableSnippet();
-        guideModal.classList.remove('hidden');
-      });
-      closeGuideBtn.addEventListener('click', () => guideModal.classList.add('hidden'));
-      closeGuideBottomBtn.addEventListener('click', () => guideModal.classList.add('hidden'));
-      guideModal.addEventListener('click', (e) => {
-        if (e.target === guideModal) guideModal.classList.add('hidden');
-      });
-
-      copyScriptableBtn.addEventListener('click', () => {
-        copyTextFallback(getScriptableWidgetCode());
-        copyScriptableBtn.textContent = 'Скопійовано ✓';
+      // Якщо увімкнено інтеграцію з системною командою iOS
+      if (chkIosShortcut.checked) {
         setTimeout(() => {
-          copyScriptableBtn.textContent = 'Копіювати код';
-        }, 1800);
-      });
+          window.location.href = 'shortcuts://run-shortcut?name=Timer30m';
+        }, 250);
+      }
+    }
 
-      // Синхронізація при поверненні з фону Safari або після зняття блокування iPhone XS
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          renderTick();
-          pullTimerFromCloud();
-        }
-      });
+    function stopTimer() {
+      const currentEnd = Number(localStorage.getItem('timerEndTime'));
+      if (currentEnd && currentEnd > Date.now()) {
+        previousEndTime = currentEnd;
+        showToast('Таймер зупинено', true);
+      }
+      localStorage.removeItem('timerEndTime');
+      localStorage.removeItem('lastPassedStep');
+      syncCloud(0);
+      updateUI();
+    }
 
-      window.addEventListener('focus', () => {
-        renderTick();
-        pullTimerFromCloud();
-      });
+    function updateUI() {
+      const endTime = Number(localStorage.getItem('timerEndTime'));
+      const now = Date.now();
 
-      // --- ЗАПУСК ---
-      syncSettingsUI();
-      renderTick();
-      if (firebaseBaseUrl) {
-        pullTimerFromCloud();
+      if (!endTime) {
+        timeDisplay.textContent = '02:00:00';
+        endTimeLabel.textContent = 'Готовий до запуску';
+        nextCheckpointLabel.style.display = 'none';
+        statusDot.className = 'dot';
+        statusBadgeText.textContent = 'Очікування';
+        ring.style.strokeDashoffset = 0;
+        ring.style.stroke = 'var(--accent)';
+        ambientGlow.style.background = 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)';
+        mainBtn.textContent = 'Старт (2 год)';
+        stopBtn.disabled = true;
+        return;
       }
 
-      setInterval(renderTick, 250);
-      setInterval(pullTimerFromCloud, CLOUD_POLL_INTERVAL_MS);
-    })();
+      const remaining = endTime - now;
+
+      if (remaining > 0) {
+        const elapsed = TOTAL_MS - remaining;
+        const progress = Math.max(0, Math.min(1, remaining / TOTAL_MS));
+        ring.style.strokeDashoffset = circumference * (1 - progress);
+
+        timeDisplay.textContent = formatRemaining(remaining);
+        endTimeLabel.textContent = `Фініш о ${formatClock(endTime)}`;
+        statusDot.className = 'dot active';
+        statusBadgeText.textContent = 'Активний';
+        mainBtn.textContent = 'Оновити (2 год)';
+        stopBtn.disabled = false;
+
+        // Перевірка проходження 30-хвилинних інтервалів (1 = 30 хв, 2 = 60 хв, 3 = 90 хв)
+        const currentStep = Math.floor(elapsed / INTERVAL_MS);
+        const lastPassedStep = Number(localStorage.getItem('lastPassedStep') || '0');
+
+        if (chk30Min.checked && currentStep > lastPassedStep && currentStep >= 1 && currentStep <= 3) {
+          localStorage.setItem('lastPassedStep', String(currentStep));
+          const passedMins = currentStep * 30;
+          const leftMins = 120 - passedMins;
+          playChime('interval');
+          sendNotification(`⏱ Минуло ${passedMins} хв`, `Залишилось ${leftMins} хв до завершення.`);
+          showToast(`⏱ Минуло ${passedMins} хв (залишилось ${leftMins} хв)`, false);
+        }
+
+        // Відображення наступного 30-хвилинного нагадування
+        if (chk30Min.checked && currentStep < 3) {
+          const nextStepTime = endTime - TOTAL_MS + (currentStep + 1) * INTERVAL_MS;
+          const minsToNext = Math.max(1, Math.ceil((nextStepTime - now) / 60000));
+          nextCheckpointLabel.style.display = 'inline-block';
+          nextCheckpointLabel.textContent = `Сигнал через ${minsToNext} хв (о ${formatClock(nextStepTime)})`;
+        } else if (chk30Min.checked) {
+          nextCheckpointLabel.style.display = 'inline-block';
+          nextCheckpointLabel.textContent = 'Фінальний відрізок (30 хв)';
+        } else {
+          nextCheckpointLabel.style.display = 'none';
+        }
+
+        // Зміна кольору за останні 15 хв
+        if (remaining <= 15 * 60 * 1000) {
+          ring.style.stroke = 'var(--warning)';
+          ambientGlow.style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%)';
+        } else {
+          ring.style.stroke = 'var(--accent)';
+          ambientGlow.style.background = 'radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, transparent 70%)';
+        }
+      } else {
+        // Таймер завершився (2 години минули)
+        timeDisplay.textContent = '00:00:00';
+        endTimeLabel.textContent = '2 години минули!';
+        nextCheckpointLabel.style.display = 'none';
+        statusDot.className = 'dot done';
+        statusBadgeText.textContent = 'Завершено';
+        ring.style.strokeDashoffset = circumference;
+        ring.style.stroke = 'var(--success)';
+        ambientGlow.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, transparent 70%)';
+        mainBtn.textContent = 'Запустити знову (2 год)';
+        stopBtn.disabled = false;
+
+        if (localStorage.getItem('lastPassedStep') !== '4') {
+          localStorage.setItem('lastPassedStep', '4');
+          playChime('finish');
+          sendNotification('⏰ Час вийшов!', 'Минуло 2 години.');
+        }
+      }
+    }
+
+    mainBtn.addEventListener('click', startOrResetTimer);
+    stopBtn.addEventListener('click', stopTimer);
+
+    setInterval(updateUI, 500);
+    setInterval(pullCloud, 5000);
+    updateUI();
   </script>
 </body>
 </html>
