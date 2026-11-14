@@ -101,6 +101,7 @@
       display: none;
     }
     .sync-tag.on { display: inline; }
+    .sync-tag.err { display: inline; color: var(--danger); }
 
     .icon-btn {
       width: 38px;
@@ -344,6 +345,12 @@
       user-select: text;
     }
 
+    .sync-status-box {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
     .action-small-btn {
       width: 100%;
       margin-top: 10px;
@@ -426,10 +433,11 @@
 
       <div class="setting-row" style="flex-direction: column; align-items: stretch;">
         <div>
-          <div class="setting-title">JSONBlob лінк (синхронізація без бази)</div>
-          <div class="setting-desc">Вставте посилання з jsonblob.com — сайт і віджет Scriptable будуть синхронними.</div>
+          <div class="setting-title">npoint.io API лінк (синхронізація)</div>
+          <div class="setting-desc">Вставте посилання вигляду https://api.npoint.io/...</div>
         </div>
-        <input type="url" class="input-field" id="sync-url-input" placeholder="https://jsonblob.com/13456789...">
+        <input type="url" class="input-field" id="sync-url-input" placeholder="https://api.npoint.io/xxxxxxxxxxxx">
+        <div class="sync-status-box" id="sync-status-box">Статус: не підключено</div>
         <button class="action-small-btn" id="copy-scriptable-btn">📋 Скопіювати код віджета для Scriptable</button>
       </div>
 
@@ -453,6 +461,7 @@
     const statusDot = document.getElementById('status-dot');
     const statusBadgeText = document.getElementById('status-badge-text');
     const syncTag = document.getElementById('sync-tag');
+    const syncStatusBox = document.getElementById('sync-status-box');
     const ambientGlow = document.getElementById('ambient-glow');
 
     const mainBtn = document.getElementById('main-btn');
@@ -471,13 +480,12 @@
     let toastTimeout = null;
     let isPushing = false;
 
-    // Автоматично перетворюємо звичайний лінк jsonblob.com/ID у API-формат jsonblob.com/api/jsonBlob/ID
     function normalizeSyncUrl(raw) {
       let url = (raw || '').trim();
       if (!url) return '';
-      if (url.includes('jsonblob.com/') && !url.includes('/api/jsonBlob/')) {
-        const id = url.split('jsonblob.com/')[1].split('/')[0].split('?')[0];
-        if (id) return `https://jsonblob.com/api/jsonBlob/${id}`;
+      if (url.includes('npoint.io/') && !url.includes('api.npoint.io')) {
+        const id = url.split('npoint.io/')[1].split('/')[0].split('?')[0];
+        if (id) return `https://api.npoint.io/${id}`;
       }
       return url;
     }
@@ -485,7 +493,10 @@
     chk30Min.checked = localStorage.getItem('remind30m') !== 'false';
     chkIosShortcut.checked = localStorage.getItem('useIosShortcut') === 'true';
     syncUrlInput.value = localStorage.getItem('syncUrl') || '';
-    if (syncUrlInput.value) syncTag.classList.add('on');
+    if (syncUrlInput.value) {
+      syncTag.classList.add('on');
+      pullCloud();
+    }
 
     chk30Min.addEventListener('change', () => {
       localStorage.setItem('remind30m', chk30Min.checked);
@@ -494,39 +505,31 @@
     chkIosShortcut.addEventListener('change', () => {
       localStorage.setItem('useIosShortcut', chkIosShortcut.checked);
     });
-    syncUrlInput.addEventListener('change', () => {
+    syncUrlInput.addEventListener('input', () => {
       const normalized = normalizeSyncUrl(syncUrlInput.value);
-      syncUrlInput.value = normalized;
       localStorage.setItem('syncUrl', normalized);
-      syncTag.classList.toggle('on', Boolean(normalized));
-      if (normalized) {
-        pullCloud();
-        showToast('🔗 Синхронізацію підключено');
-      }
+      if (normalized) pullCloud();
     });
 
-    // Генерація коду для віджета Scriptable з уже вшитим посиланням
     document.getElementById('copy-scriptable-btn').onclick = () => {
-      const apiUrl = normalizeSyncUrl(syncUrlInput.value) || 'ВСТАВ_СЮДИ_JSONBLOB_API_ЛІНК';
+      const apiUrl = normalizeSyncUrl(syncUrlInput.value) || 'ВСТАВ_СЮДИ_NPOINT_API_ЛІНК';
       const scriptableCode = `// Віджет таймера 2 год для iOS (Scriptable)
 const API_URL = "${apiUrl}";
 const TOTAL_MS = 7200000;
 
 async function sync() {
   const req = new Request(API_URL);
-  req.headers = { "Accept": "application/json" };
   return await req.loadJSON();
 }
 
 async function push(endTime, pausedRemaining) {
   const req = new Request(API_URL);
-  req.method = "PUT";
-  req.headers = { "Content-Type": "application/json", "Accept": "application/json" };
+  req.method = "POST";
+  req.headers = { "Content-Type": "application/json" };
   req.body = JSON.stringify({ endTime, pausedRemaining, updatedAt: Date.now() });
   await req.loadJSON();
 }
 
-// Якщо натиснули на віджет — перезапускаємо 2 години і відкриваємо сайт
 if (config.runsInApp) {
   await push(Date.now() + TOTAL_MS, 0);
 }
@@ -541,18 +544,18 @@ title.font = Font.boldSystemFont(11);
 title.textColor = new Color("#94a3b8");
 w.addSpacer(6);
 
-let statusStr = "02:00:00";
+let statusStr = "02:00";
 let subStr = "Натисни для старту";
 let accentColor = new Color("#38bdf8");
 
-if (data.pausedRemaining > 0) {
+if (data && data.pausedRemaining > 0) {
   const sec = Math.ceil(data.pausedRemaining / 1000);
   const h = String(Math.floor(sec / 3600)).padStart(2, "0");
   const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
   statusStr = \`\${h}:\${m}\`;
   subStr = "⏸ На паузі";
   accentColor = new Color("#f59e0b");
-} else if (data.endTime > Date.now()) {
+} else if (data && data.endTime > Date.now()) {
   const rem = data.endTime - Date.now();
   const sec = Math.ceil(rem / 1000);
   const h = String(Math.floor(sec / 3600)).padStart(2, "0");
@@ -561,7 +564,7 @@ if (data.pausedRemaining > 0) {
   const endClock = \`\${String(d.getHours()).padStart(2,"0")}:\${String(d.getMinutes()).padStart(2,"0")}\`;
   statusStr = \`\${h}:\${m}\`;
   subStr = \`Фініш о \${endClock}\`;
-} else if (data.endTime > 0) {
+} else if (data && data.endTime > 0) {
   statusStr = "00:00";
   subStr = "✅ Час вийшов!";
   accentColor = new Color("#10b981");
@@ -651,27 +654,43 @@ Script.complete();`;
       }
     };
 
+    // npoint.io приймає оновлення через POST
     async function syncCloud(endTimeVal, pausedVal = 0) {
-      const apiUrl = localStorage.getItem('syncUrl');
+      const apiUrl = normalizeSyncUrl(localStorage.getItem('syncUrl'));
       if (!apiUrl) return;
       isPushing = true;
       try {
-        await fetch(apiUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ endTime: endTimeVal, pausedRemaining: pausedVal, updatedAt: Date.now() })
         });
-      } catch (e) {} finally {
+        if (res.ok) {
+          syncTag.className = 'sync-tag on';
+          syncTag.textContent = '• Sync';
+          syncStatusBox.textContent = 'Статус: ✅ Синхронізовано';
+        } else {
+          throw new Error('HTTP ' + res.status);
+        }
+      } catch (e) {
+        syncTag.className = 'sync-tag err';
+        syncTag.textContent = '• Помилка';
+        syncStatusBox.textContent = 'Статус: ❌ Помилка зʼєднання (перевірте лінк)';
+      } finally {
         setTimeout(() => { isPushing = false; }, 1000);
       }
     }
 
     async function pullCloud() {
-      const apiUrl = localStorage.getItem('syncUrl');
+      const apiUrl = normalizeSyncUrl(localStorage.getItem('syncUrl'));
       if (!apiUrl || isPushing) return;
       try {
-        const res = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(apiUrl + '?t=' + Date.now());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
+        syncTag.className = 'sync-tag on';
+        syncTag.textContent = '• Sync';
+        syncStatusBox.textContent = 'Статус: ✅ Звʼязок з хмарою є';
         if (!data) return;
 
         const localEnd = Number(localStorage.getItem('timerEndTime')) || 0;
@@ -690,7 +709,11 @@ Script.complete();`;
           localStorage.removeItem('pausedRemaining');
           updateUI();
         }
-      } catch (e) {}
+      } catch (e) {
+        syncTag.className = 'sync-tag err';
+        syncTag.textContent = '• Помилка';
+        syncStatusBox.textContent = 'Статус: ❌ Не вдалося підключитись (перевірте лінк)';
+      }
     }
 
     function formatClock(timestamp) {
